@@ -1,2 +1,17 @@
 User-agent: *
 Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://clearfunnel.com/sitemap.xml
+
+# Block app routes from indexing
+User-agent: *
+Disallow: /app/

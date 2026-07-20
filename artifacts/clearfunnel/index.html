@@ -2,20 +2,155 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>ClearFunnel</title>
-    <meta name="description" content="ClearFunnel — built on Replit. Update this description to reflect the app." />
-    <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="ClearFunnel" />
-    <meta property="og:description" content="ClearFunnel — built on Replit. Update this description to reflect the app." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
+
+    <!-- Primary SEO -->
+    <title>ClearFunnel — ATS Decision Governance Layer | See Every Decision. Trust Every Hire.</title>
+    <meta name="description" content="ClearFunnel validates your ATS filter rules before they go live, logs every auto-rejection with a traceable reason, monitors for bias and anomalies, and helps you recover wrongly-filtered candidates. Built for HR teams who care about fair, accountable hiring." />
+    <meta name="keywords" content="ATS governance, applicant tracking system, hiring automation, rejection monitoring, HR compliance, recruiting audit, ATS rules validation, candidate recovery, hiring bias, employment screening" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="author" content="ClearFunnel Inc." />
+    <meta name="theme-color" content="#0B1426" />
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="ClearFunnel" />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://clearfunnel.com/" />
+    <meta property="og:title" content="ClearFunnel — See Every Decision. Trust Every Hire." />
+    <meta property="og:description" content="The governance layer for your ATS. Validate rules before they go live, log every rejection with a traceable reason, monitor anomalies, and recover wrongly-filtered candidates — without replacing your existing ATS." />
+    <meta property="og:image" content="https://clearfunnel.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="ClearFunnel" />
-    <meta name="twitter:description" content="ClearFunnel — built on Replit. Update this description to reflect the app." />
+    <meta name="twitter:site" content="@clearfunnel" />
+    <meta name="twitter:title" content="ClearFunnel — See Every Decision. Trust Every Hire." />
+    <meta name="twitter:description" content="The governance layer for your ATS. Validate rules, log every rejection, monitor anomalies, and recover wrongly-filtered candidates." />
+    <meta name="twitter:image" content="https://clearfunnel.com/og-image.jpg" />
+
+    <!-- Geo targeting -->
+    <meta name="geo.region" content="KE" />
+    <meta name="geo.placename" content="Nairobi, Kenya" />
+    <meta name="geo.position" content="-1.286389;36.817223" />
+    <meta name="ICBM" content="-1.286389, 36.817223" />
+
+    <!-- AEO — Answer Engine Optimization -->
+    <meta name="application-name" content="ClearFunnel" />
+    <meta name="category" content="HR Technology, ATS Governance, Recruiting Compliance" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://clearfunnel.com/" />
+
+    <!-- Satoshi font (brand typeface) from Fontshare CDN -->
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preload" as="style" href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400,900,300&display=swap" />
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400,900,300&display=swap" rel="stylesheet" />
+
+    <!-- Schema.org JSON-LD — SoftwareApplication + Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://clearfunnel.com/#software",
+          "name": "ClearFunnel",
+          "applicationCategory": "BusinessApplication",
+          "applicationSubCategory": "HR Technology",
+          "operatingSystem": "Web",
+          "description": "ATS Decision Governance Layer — validates hiring filter rules before they go live, logs auto-rejections with traceable reasons, monitors for anomalies, and enables candidate recovery.",
+          "url": "https://clearfunnel.com",
+          "featureList": [
+            "Validation Harness for ATS rules",
+            "Immutable decision logging",
+            "90-day candidate recovery pool",
+            "Real-time anomaly detection and alerts",
+            "Webhook-based ATS integration"
+          ],
+          "offers": {
+            "@type": "AggregateOffer",
+            "offerCount": 3,
+            "offers": [
+              {
+                "@type": "Offer",
+                "name": "Pilot",
+                "description": "For testing with a single department",
+                "price": "0",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock"
+              },
+              {
+                "@type": "Offer",
+                "name": "Growth",
+                "description": "For scaling companies needing total funnel visibility",
+                "price": "299",
+                "priceCurrency": "USD",
+                "priceSpecification": {
+                  "@type": "UnitPriceSpecification",
+                  "billingDuration": "P1M",
+                  "billingIncrement": 1
+                },
+                "availability": "https://schema.org/InStock"
+              },
+              {
+                "@type": "Offer",
+                "name": "Enterprise",
+                "description": "Custom SLAs for large talent organizations",
+                "availability": "https://schema.org/InStock"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://clearfunnel.com/#organization",
+          "name": "ClearFunnel Inc.",
+          "url": "https://clearfunnel.com",
+          "logo": "https://clearfunnel.com/favicon.svg",
+          "description": "Building governance infrastructure to make every ATS hiring decision visible, testable, and accountable.",
+          "slogan": "See every decision. Trust every hire.",
+          "foundingDate": "2026",
+          "sameAs": [
+            "https://linkedin.com/company/clearfunnel",
+            "https://twitter.com/clearfunnel"
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Nairobi",
+            "addressCountry": "KE"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "stanley@clearfunnel.com",
+            "telephone": "+254700033456"
+          },
+          "founder": {
+            "@type": "Person",
+            "name": "Stanley Njoroge",
+            "jobTitle": "Founder & CEO",
+            "email": "stanley@clearfunnel.com"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://clearfunnel.com/#website",
+          "url": "https://clearfunnel.com",
+          "name": "ClearFunnel",
+          "description": "ATS Decision Governance Layer",
+          "publisher": { "@id": "https://clearfunnel.com/#organization" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://clearfunnel.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

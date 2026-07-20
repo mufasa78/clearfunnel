@@ -1,3 +1,11 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="cfGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="10" width="40" height="7" rx="3.5" fill="url(#cfGrad)"/>
+  <rect x="10" y="22" width="28" height="7" rx="3.5" fill="url(#cfGrad)"/>
+  <rect x="16" y="34" width="16" height="7" rx="3.5" fill="url(#cfGrad)"/>
 </svg>
