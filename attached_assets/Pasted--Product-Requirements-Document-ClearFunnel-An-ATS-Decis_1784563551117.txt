@@ -1,0 +1,169 @@
+# Product Requirements Document: ClearFunnel
+### An ATS Decision Governance Layer
+*(Working title — rename as needed)*
+
+**Status:** Draft v1
+**Owner:** Stanley Njoroge / Help With Mufasa
+**Last updated:** July 2026
+
+---
+
+## 1. Executive Summary
+
+**Problem Statement:** Companies rely on ATS platforms to auto-reject candidates at scale, but the filtering logic is configured once, rarely re-tested, and invisible to the HR teams accountable for hiring outcomes — resulting in silent false rejections, undetected bias exposure, and no way to know how many qualified candidates were never seen.
+
+**Proposed Solution:** ClearFunnel is a SaaS layer that sits alongside a company's existing ATS, intercepting rejection decisions to validate filtering rules before they go live, log every auto-reject with a traceable reason, monitor rejection patterns for anomalies, and recover wrongly-filtered candidates — without replacing the ATS itself.
+
+**Success Criteria (MVP, 1–2 pilot companies):**
+- 100% of auto-rejections during the pilot are traceable to a specific logged rule (vs. 0% today).
+- The validation harness catches at least one real false-rejection case per pilot company within the first 30 days (proving the core "would this have caught the headline scenario" premise).
+- Rule-change-to-validation-result turnaround under 5 minutes (fast enough that HR teams don't route around it).
+- Pilot company can recover and re-queue at least one previously-rejected candidate through the system within week 1 of go-live.
+- Zero pilot company churn during the MVP window due to integration friction.
+
+---
+
+## 2. User Experience & Functionality
+
+### 2.1 User Personas
+
+- **HR Operations Lead (primary)** — owns the ATS relationship, accountable for filter quality, needs visibility without needing to understand the underlying rule engine.
+- **Recruiter** — works the candidate pipeline day-to-day, needs to know *why* a candidate was filtered when something looks off, needs an easy override path.
+- **HR/People Systems Admin (technical-adjacent)** — configures filter rules, is the one who would push a rule change; needs the validation gate to be fast and non-disruptive.
+- **HWM (platform operator)** — needs onboarding to be low-friction per company, since each pilot integrates with a different ATS.
+
+### 2.2 User Stories
+
+1. **As an HR Ops Lead**, I want to see why any candidate was auto-rejected, so that I can trust the funnel isn't quietly discarding qualified people.
+   - **AC:** Every rejected candidate record shows the specific rule(s) that triggered rejection, in plain language, not a rule ID.
+   - **AC:** This view is available without engineering help — self-serve in the dashboard.
+
+2. **As a People Systems Admin**, I want any new filter rule to be automatically tested against a benchmark resume set before it goes live, so a bad rule never reaches production silently.
+   - **AC:** A rule change cannot go live if it causes any "should-pass" benchmark resume to be rejected, unless manually overridden with a logged justification.
+   - **AC:** Validation results are returned in under 5 minutes.
+
+3. **As a Recruiter**, I want to pull a candidate out of the rejected pool if I believe the filter got it wrong, so a good candidate isn't permanently lost.
+   - **AC:** Rejected candidates remain recoverable for a minimum 90-day retention window.
+   - **AC:** Overrides are logged with recruiter ID, timestamp, and reason.
+
+4. **As an HR Ops Lead**, I want to be alerted automatically if rejection rates spike or shift unexpectedly, so I find out in days, not by accident months later.
+   - **AC:** System flags any role where the rejection rate deviates more than 2 standard deviations from its 30-day rolling baseline.
+   - **AC:** Alert includes the rule(s) most correlated with the shift.
+
+5. **As HWM**, I want to onboard a new pilot company's ATS with minimal custom engineering, so the MVP can scale past the first 1–2 companies.
+   - **AC:** Supported via standard ATS webhook/API integration (starting with one major platform, e.g. Greenhouse or Lever) with a documented connector pattern for adding others.
+
+### 2.3 Non-Goals (v1 / MVP)
+
+- **Not** replacing or migrating companies off their existing ATS.
+- **Not** building a full candidate-facing product (candidates don't interact with ClearFunnel directly in v1).
+- **Not** building the independent auto-scoring/re-ranking engine yet (Phase 3 — see Roadmap). MVP focuses on validating and monitoring *existing* filter logic, not replacing the ATS's judgment.
+- **Not** supporting every ATS platform at launch — one integration, proven, before expanding.
+- **Not** a full HRIS or applicant CRM — ClearFunnel is a governance layer, not a system of record.
+
+---
+
+## 3. Core Business Logic — The "Automatic Algo," Phased
+
+This is the engine that makes the product real rather than a dashboard. It ships in three phases, per your direction ("all of the above, phased") — MVP includes Phase 1 in full and Phase 2 in a lightweight form; Phase 3 is post-MVP.
+
+### Phase 1 — Rule Validation Harness (MVP core loop)
+**What it does:** Every time a filter rule is added or changed in the connected ATS (detected via webhook or polling), ClearFunnel automatically runs a benchmark set of resumes against the new rule before it's allowed to take effect in the live decision path.
+
+**Logic:**
+- Benchmark set = a curated mix of "should-pass" resumes (including, deliberately, resumes representing non-traditional paths: career changers, employment gaps, non-linear backgrounds) and "should-fail" resumes (genuinely unqualified, to confirm the rule still filters correctly).
+- A rule change **fails validation** if any "should-pass" resume is rejected by it. Failure blocks the rule from taking effect and notifies the Admin with the specific conflict.
+- A rule change can only go live over a validation failure via explicit, logged manual override — creating an audit trail rather than a silent bypass.
+- This is the direct, mechanical answer to the headline scenario: the hiring manager's own resume becomes one of the canary "should-pass" cases, permanently, as a standing regression test.
+
+### Phase 2 — Anomaly Detection (MVP-lite → full post-MVP)
+**What it does:** Continuously monitors rejection rates per role/rule and flags statistically significant shifts, even when no rule change was logged (catching drift, vendor-side changes, or data issues the company didn't initiate).
+
+**Logic:**
+- Maintain a rolling 30-day baseline rejection rate per role.
+- Flag when the current rejection rate deviates more than 2 standard deviations from baseline (configurable threshold).
+- Cross-reference the flagged window against the Rule Registry's change log to auto-suggest the likely cause.
+- MVP ships a simplified version of this (basic threshold alerting); full anomaly modeling (e.g., seasonality-aware baselines) is a fast-follow, not blocking pilot launch.
+
+### Phase 3 — Independent Scoring Layer (post-MVP)
+**What it does:** Runs a second, independent evaluation of candidates alongside the ATS's own filter — not to override it, but to surface cases where the two disagree significantly, as an extra check against blind spots in the primary filter.
+
+**Logic:**
+- Lightweight keyword/skills-match scoring independent of the ATS's internal logic.
+- Surfaces "disagreement cases" (ATS rejects, independent score is high) for human review rather than auto-approving — keeps a human in the loop for the highest-stakes disagreements.
+- Explicitly out of scope for MVP; documented here so the architecture doesn't have to be reworked to support it later.
+
+---
+
+## 4. Technical Specifications
+
+### 4.1 Architecture Overview
+
+- **Ingestion layer:** Webhook/API listeners per ATS integration, capturing rule changes and rejection events as they happen.
+- **Rule Registry:** Versioned, timestamped store of every filter rule — what it checks, when it changed, who approved it. Source of truth for the validation harness and audit trail.
+- **Validation Harness (job-based):** Runs asynchronously via a queue when a rule change is detected, executing the benchmark set and returning pass/fail before the rule is allowed to activate.
+- **Decision Log:** Every auto-reject event stored with the triggering rule(s), timestamp, and candidate reference — queryable for audit and dashboard display.
+- **Monitoring Engine:** Scheduled job computing rolling baselines and anomaly flags per role.
+- **Dashboard (customer-facing):** Self-serve view for HR Ops/Recruiters — reject reasons, validation status, anomaly alerts, override/recovery actions.
+
+### 4.2 Suggested Stack (matches your existing patterns)
+
+- **Backend:** AdonisJS (TypeScript) — API, auth, business logic orchestration.
+- **Job/queue processing:** BullMQ + Redis — for async rule validation runs and scheduled anomaly checks.
+- **Database:** PostgreSQL/NeonDB via Prisma — Rule Registry, Decision Log, audit trail (relational integrity matters here for auditability).
+- **Real-time layer:** Convex — for live dashboard updates (e.g., validation results, anomaly alerts appearing without refresh).
+- **Frontend:** Next.js 15 / React 19 / TypeScript / TailwindCSS / Shadcn/UI / TanStack Query — customer dashboard.
+- **Auth:** JWT/refresh token pattern, per-company tenant isolation.
+
+### 4.3 Integration Points
+
+- **ATS connector (v1):** One platform to start — evaluate Greenhouse or Lever first based on API maturity and webhook support for rule/rejection events.
+- **Webhook receivers:** For real-time rejection and rule-change events where the ATS supports them; polling fallback where it doesn't.
+- **Email/notification:** Reuse existing Nodemailer/Axene Mailer pattern for anomaly alerts and validation failure notices.
+
+### 4.4 Security & Privacy
+
+- Candidate PII (resumes, contact info) requires encryption at rest and in transit; access scoped per tenant company.
+- Retention policy for the recoverable-rejected-candidate pool (proposed 90 days) must be configurable per company to match their own data retention/compliance obligations.
+- Audit trail (who changed a rule, who overrode a validation failure) is immutable — append-only log, not editable records.
+- Multi-tenant isolation is non-negotiable from day one: one pilot company must never be able to see another's data, even at 2-customer scale.
+
+---
+
+## 5. Risks & Roadmap
+
+### 5.1 Phased Rollout
+
+**Phase 0 — Pilot Setup (Weeks 1–4)**
+- Select 1–2 pilot companies (existing HWM relationships are a natural starting point).
+- Build the single ATS connector (webhook ingestion + rejection/rule-change capture).
+- Stand up Rule Registry and Decision Log.
+
+**Phase 1 — MVP Core Loop (Weeks 4–10)**
+- Ship the Validation Harness with an initial benchmark resume set per pilot company (co-built with the company's HR team — this is where a partner like Dorcas's HR expertise plugs in directly).
+- Ship the basic dashboard: reject reasons, validation status, manual override with logging.
+- Goal: prove the core premise — a bad rule change gets caught before it costs a real candidate.
+
+**Phase 2 — Monitoring (Weeks 10–16)**
+- Ship lightweight anomaly detection (threshold-based rejection rate alerts).
+- Ship the recoverable-candidate pool and recruiter-facing override/recovery flow.
+
+**Phase 3 — Independent Scoring (post-MVP, v2.0)**
+- Design and pilot the independent scoring layer as an opt-in enhancement, once the core governance loop has proven trust with pilot companies.
+
+### 5.2 Technical Risks
+
+- **ATS API/webhook limitations:** Not all platforms expose rule-change events cleanly; may require polling workarounds that reduce real-time accuracy for the first integration.
+- **Benchmark set quality:** The validation harness is only as good as its "should-pass" resume set — this must be co-created with each pilot company's HR team, not assumed generically, or it risks false confidence.
+- **Alert fatigue:** Anomaly thresholds set too sensitively will generate noise and get ignored, replicating the exact "alerts nobody watches" failure this product exists to prevent — needs careful tuning per pilot, not a single global default.
+- **Multi-tenant complexity at small scale:** Building proper tenant isolation for 2 pilot customers is more upfront work than a single-customer MVP, but is a foundational requirement, not a shortcut worth skipping even at this stage.
+- **Trust/adoption risk:** If the validation harness produces false positives (blocking legitimate rule changes), HR teams will route around it — the override path exists specifically to prevent this from breaking adoption, but override frequency itself needs monitoring as a leading indicator of harness quality.
+
+---
+
+## Open Items (TBD — needs your input before build starts)
+
+- **Target pilot companies:** Which 1–2 companies (existing HWM relationships, or new outreach)?
+- **First ATS integration:** Greenhouse, Lever, BambooHR, or another — depends on which pilot company's stack you land on.
+- **Budget/timeline for MVP:** Not yet specified — the phased roadmap above assumes roughly a 10-week build to core loop, but that should be tested against your actual capacity and any co-founder/team allocation (e.g. Tracy's design/brand input for the dashboard).
+- **Pricing model:** Not addressed in this PRD — recommend scoping as a separate exercise once the pilot proves the core loop.

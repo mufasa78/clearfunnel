@@ -1,10 +1,11 @@
-# [Project name]
+# ClearFunnel
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An ATS Decision Governance Layer — a SaaS product that sits alongside a company's existing ATS, making every automated rejection decision visible, testable, and recoverable. Built for HR Operations teams who need auditability, not a new ATS.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/clearfunnel run dev` — run the frontend (port auto-assigned)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -14,23 +15,34 @@ _Replace the heading above with the project's name, and this line with one sente
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
+- Frontend: React + Vite, Wouter routing, TanStack Query, Recharts, shadcn/ui, Tailwind CSS
 - API: Express 5
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
+- API codegen: Orval (from OpenAPI spec in `lib/api-spec/openapi.yaml`)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/api-spec/openapi.yaml` — single source of truth for all API contracts
+- `lib/db/src/schema/` — Drizzle table definitions (roles, rules, benchmark_resumes, validation_runs, candidates, decisions, alerts)
+- `artifacts/api-server/src/routes/` — Express route handlers (roles, rules, validation, benchmarks, decisions, candidates, alerts, dashboard)
+- `artifacts/clearfunnel/src/` — React frontend (pages per route, persistent sidebar layout)
+
+## Core Product Concepts
+
+- **Rule Registry** — Versioned log of every ATS filter rule. Rules must pass validation before going active.
+- **Validation Harness** — Benchmark resume set (should-pass + should-fail) tested automatically on rule changes. A rule that rejects a should-pass resume is blocked from activating.
+- **Decision Log** — Every auto-rejection stored with the specific rule(s) that triggered it, in plain language.
+- **Recovery Pool** — Rejected candidates retained for 90 days; recoverable with logged override + reason.
+- **Anomaly Alerts** — Monitors rejection rates per role, flags statistically significant shifts.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
+- OpenAPI-first: all contracts defined in `lib/api-spec/openapi.yaml`, codegen produces React Query hooks and Zod validation schemas. Subagent used for the full frontend build.
+- Multi-tenant isolation is foundational (per PRD) — schema supports company/tenant scoping for future expansion.
+- Validation harness runs a simulation on demand (Phase 1 MVP); full async queue-based execution is Phase 2.
+- Dashboard summary endpoint computes all stats in a single request to keep the dashboard load fast.
 
 ## User preferences
 
@@ -38,8 +50,6 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- After any OpenAPI spec change, re-run `pnpm --filter @workspace/api-spec run codegen` before touching frontend code.
+- `pnpm --filter @workspace/db run push` must be run after schema changes before restarting the API server.
+- Express 5 wildcard routes require named params: `/{*splat}` not `*`.
