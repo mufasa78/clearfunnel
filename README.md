@@ -99,6 +99,9 @@ The app will be available at `http://localhost:5173` (frontend) and `http://loca
 
 ```
 clear-funnel/
+├── api/                       # Vercel serverless functions
+│   └── index.ts              # Express API wrapper for Vercel
+│
 ├── artifacts/                  # Applications and services
 │   ├── clearfunnel/           # React frontend (Vite + Tailwind)
 │   ├── api-server/            # Express API server
@@ -116,6 +119,10 @@ clear-funnel/
 ├── package.json               # Workspace root configuration
 ├── pnpm-workspace.yaml        # pnpm workspace configuration
 ├── tsconfig.base.json         # Shared TypeScript configuration
+├── vercel.json                # Vercel deployment configuration
+├── .vercelignore              # Vercel ignore patterns
+├── .env.example               # Environment variables template
+├── VERCEL_DEPLOYMENT.md       # Detailed deployment guide
 └── README.md                  # This file
 ```
 
@@ -297,6 +304,53 @@ JWT_SECRET=your-secret-key
 # Frontend
 VITE_API_BASE_URL=https://api.clearfunnel.com
 ```
+
+---
+
+## 🚀 Deploying to Vercel
+
+ClearFunnel is fully configured for deployment on Vercel, including both the frontend and backend API as a serverless function.
+
+### Quick Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/clear-funnel)
+
+### Manual Deployment
+
+1. **Install Vercel CLI:**
+```bash
+npm install -g vercel
+```
+
+2. **Login to Vercel:**
+```bash
+vercel login
+```
+
+3. **Deploy:**
+```bash
+vercel --prod
+```
+
+4. **Set Environment Variables:**
+
+Go to your Vercel dashboard and add:
+- `DATABASE_URL` — PostgreSQL connection string
+- `VITE_API_BASE_URL` — Your deployment URL + /api (e.g., `https://yourapp.vercel.app/api`)
+
+5. **Run Database Migrations:**
+```bash
+pnpm --filter @workspace/db run push
+```
+
+### Vercel Configuration
+
+- **Frontend**: Static site served from `artifacts/clearfunnel/dist`
+- **Backend**: Serverless function at `/api` routes
+- **Rewrites**: All `/api/*` requests route to the Express backend
+- **Runtime**: Node.js 20.x with 1GB memory
+
+For detailed deployment instructions, see [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md).
 
 ---
 

@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Build artifacts
+.next
+dist
+.cache
+.vite
+
+# Development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Testing
+coverage
+.nyc_output
+
+# Misc
+.replit
+.replit-artifact
+.local
+.agents
+attached_assets
+zipFile.zip
