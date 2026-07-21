@@ -22,6 +22,9 @@ import Home from '@/pages/marketing/home';
 import Pricing from '@/pages/marketing/pricing';
 import HowItWorks from '@/pages/marketing/how-it-works';
 import About from '@/pages/marketing/about';
+import Privacy from '@/pages/marketing/privacy';
+import Terms from '@/pages/marketing/terms';
+import Security from '@/pages/marketing/security';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,6 +69,30 @@ function AppRouter() {
           description="ClearFunnel was built because hiring rules need adult supervision. We make every automated hiring decision visible, testable, and accountable."
         >
           <About />
+        </MarketingLayout>
+      </Route>
+      <Route path="/privacy">
+        <MarketingLayout
+          title="Privacy Policy — ClearFunnel"
+          description="ClearFunnel's privacy policy: what we collect, why, and how you can control it. We believe privacy is a right, not a checkbox."
+        >
+          <Privacy />
+        </MarketingLayout>
+      </Route>
+      <Route path="/terms">
+        <MarketingLayout
+          title="Terms of Service — ClearFunnel"
+          description="The terms governing your use of ClearFunnel. Written to be readable — if something is unclear, ask us before agreeing."
+        >
+          <Terms />
+        </MarketingLayout>
+      </Route>
+      <Route path="/security">
+        <MarketingLayout
+          title="Security — ClearFunnel"
+          description="Security at ClearFunnel: SOC 2 Type II, AES-256 encryption, TLS 1.3, annual penetration testing, and responsible disclosure."
+        >
+          <Security />
         </MarketingLayout>
       </Route>
 

@@ -283,9 +283,9 @@ export default function MarketingLayout({ children, title, description }: Market
                 {[
                   { label: "About us", href: "/about" },
                   { label: "Contact us", href: "mailto:stanley@clearfunnel.com" },
-                  { label: "Privacy Policy", href: "#" },
-                  { label: "Terms of Service", href: "#" },
-                  { label: "Security", href: "#" },
+                  { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Terms of Service", href: "/terms" },
+                  { label: "Security", href: "/security" },
                 ].map((item) => (
                   <li key={item.label}>
                     <a href={item.href} className="text-white/50 hover:text-white/90 transition-colors text-sm">
