@@ -1,24 +1,12 @@
 {
-  "version": 2,
   "buildCommand": "pnpm run build",
   "devCommand": "pnpm --filter @workspace/clearfunnel run dev",
   "installCommand": "pnpm install",
-  "framework": null,
   "outputDirectory": "artifacts/clearfunnel/dist",
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "destination": "/api"
     }
-  ],
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "nodejs20.x",
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
