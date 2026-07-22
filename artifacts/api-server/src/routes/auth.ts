@@ -5,7 +5,7 @@ import { api } from "../../../../convex/_generated/api.js";
 
 const router = Router();
 
-router.post("/register", async (req: Request, res: Response) => {
+router.post("/register", async (req: any, res: any) => {
   try {
     const { email, password, name } = req.body;
     
@@ -32,7 +32,7 @@ router.post("/register", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", async (req: any, res: any) => {
   try {
     const { email, password } = req.body;
 
