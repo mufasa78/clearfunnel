@@ -1,23 +1,26 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
+import bcrypt from "bcryptjs";
+// @ts-ignore — convex types are resolved at workspace root, not api-server scope
 import { convex } from "../lib/convex.js";
-import { signToken } from "../lib/jwt.js";
+// @ts-ignore — convex types are resolved at workspace root, not api-server scope
 import { api } from "../../../../convex/_generated/api.js";
+import { signToken } from "../lib/jwt.js";
 
 const router = Router();
+
+const SALT_ROUNDS = 12;
 
 router.post("/register", async (req: any, res: any) => {
   try {
     const { email, password, name } = req.body;
-    
+
     if (!email || !password) {
       res.status(400).json({ error: "Email and password are required" });
       return;
     }
 
-    // Hash password here in a real app (e.g. bcrypt). For demo purposes we simulate it.
-    const passwordHash = `hashed_${password}`;
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // Create user via Convex mutation
     const userId = await convex.mutation(api.users.createUser, {
       email,
       passwordHash,
@@ -25,7 +28,6 @@ router.post("/register", async (req: any, res: any) => {
     });
 
     const token = signToken({ userId, email });
-    
     res.json({ token, userId });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -41,7 +43,6 @@ router.post("/login", async (req: any, res: any) => {
       return;
     }
 
-    // Retrieve user via Convex query
     const user = await convex.query(api.users.getUserByEmail, { email });
 
     if (!user) {
@@ -49,15 +50,13 @@ router.post("/login", async (req: any, res: any) => {
       return;
     }
 
-    const passwordHash = `hashed_${password}`;
-
-    if (user.passwordHash !== passwordHash) {
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
       res.status(401).json({ error: "Invalid email or password" });
       return;
     }
 
     const token = signToken({ userId: user._id, email: user.email });
-    
     res.json({ token, userId: user._id });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

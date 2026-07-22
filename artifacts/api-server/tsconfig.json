@@ -5,7 +5,12 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "outDir": "dist",
     "rootDir": "src",
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "convex": ["node_modules/convex"],
+      "convex/*": ["node_modules/convex/*"]
+    }
   },
   "include": ["src"],
   "references": [
