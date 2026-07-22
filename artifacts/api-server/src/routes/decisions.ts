@@ -1,8 +1,8 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response } from "express";
 import { db, decisionsTable, decisionRulesTable, candidatesTable, rolesTable, filterRulesTable } from "@workspace/db";
 import { eq, and, sql, inArray } from "drizzle-orm";
 
-const router: IRouter = Router();
+const router = Router();
 
 async function enrichDecision(d: typeof decisionsTable.$inferSelect) {
   const [candidate] = await db.select().from(candidatesTable).where(eq(candidatesTable.id, d.candidateId));
@@ -29,7 +29,7 @@ async function enrichDecision(d: typeof decisionsTable.$inferSelect) {
   };
 }
 
-router.get("/decisions", async (req, res): Promise<void> => {
+router.get("/decisions", async (req: Request, res: Response): Promise<void> => {
   const { roleId, ruleId, recovered, limit = "50", offset = "0" } = req.query;
 
   let allDecisions = await db.select().from(decisionsTable).orderBy(decisionsTable.rejectedAt);
@@ -64,7 +64,7 @@ router.get("/decisions", async (req, res): Promise<void> => {
   res.json({ items, total });
 });
 
-router.post("/decisions", async (req, res): Promise<void> => {
+router.post("/decisions", async (req: Request, res: Response): Promise<void> => {
   const { candidateId, roleId, triggeredRuleIds } = req.body;
   if (!candidateId || !roleId || !triggeredRuleIds) {
     res.status(400).json({ error: "candidateId, roleId, triggeredRuleIds are required" });
@@ -99,7 +99,7 @@ router.post("/decisions", async (req, res): Promise<void> => {
   res.status(201).json(await enrichDecision(decision));
 });
 
-router.get("/decisions/:id", async (req, res): Promise<void> => {
+router.get("/decisions/:id", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
   const [decision] = await db.select().from(decisionsTable).where(eq(decisionsTable.id, id));

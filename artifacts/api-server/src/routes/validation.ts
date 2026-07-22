@@ -1,10 +1,10 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response } from "express";
 import { db, validationRunsTable, validationResultsTable, filterRulesTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 
-const router: IRouter = Router();
+const router = Router();
 
-router.get("/validation-runs", async (req, res): Promise<void> => {
+router.get("/validation-runs", async (req: Request, res: Response): Promise<void> => {
   const { ruleId, status } = req.query;
 
   let conditions: any[] = [];
@@ -36,7 +36,7 @@ router.get("/validation-runs", async (req, res): Promise<void> => {
   })));
 });
 
-router.get("/validation-runs/:id", async (req, res): Promise<void> => {
+router.get("/validation-runs/:id", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 

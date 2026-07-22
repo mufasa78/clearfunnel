@@ -1,10 +1,10 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response } from "express";
 import { db, rolesTable, filterRulesTable, decisionsTable } from "@workspace/db";
 import { eq, count, sql } from "drizzle-orm";
 
-const router: IRouter = Router();
+const router = Router();
 
-router.get("/roles", async (req, res): Promise<void> => {
+router.get("/roles", async (req: Request, res: Response): Promise<void> => {
   const roles = await db.select().from(rolesTable).orderBy(rolesTable.name);
 
   const rulesCount = await db
@@ -33,7 +33,7 @@ router.get("/roles", async (req, res): Promise<void> => {
   res.json(result);
 });
 
-router.post("/roles", async (req, res): Promise<void> => {
+router.post("/roles", async (req: Request, res: Response): Promise<void> => {
   const { name, department } = req.body;
   if (!name) {
     res.status(400).json({ error: "name is required" });
@@ -50,7 +50,7 @@ router.post("/roles", async (req, res): Promise<void> => {
   });
 });
 
-router.get("/roles/:id", async (req, res): Promise<void> => {
+router.get("/roles/:id", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
   const [role] = await db.select().from(rolesTable).where(eq(rolesTable.id, id));

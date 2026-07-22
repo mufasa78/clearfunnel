@@ -1,8 +1,8 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response } from "express";
 import { db, candidatesTable, decisionsTable, decisionRulesTable, rolesTable } from "@workspace/db";
 import { eq, and, ilike, or } from "drizzle-orm";
 
-const router: IRouter = Router();
+const router = Router();
 
 async function enrichCandidate(c: typeof candidatesTable.$inferSelect) {
   const [role] = await db.select().from(rolesTable).where(eq(rolesTable.id, c.roleId));
@@ -26,7 +26,7 @@ async function enrichCandidate(c: typeof candidatesTable.$inferSelect) {
   };
 }
 
-router.get("/candidates", async (req, res): Promise<void> => {
+router.get("/candidates", async (req: Request, res: Response): Promise<void> => {
   const { roleId, recovered, search } = req.query;
 
   let candidates = await db.select().from(candidatesTable).orderBy(candidatesTable.rejectedAt);
@@ -53,7 +53,7 @@ router.get("/candidates", async (req, res): Promise<void> => {
   res.json(result);
 });
 
-router.get("/candidates/:id", async (req, res): Promise<void> => {
+router.get("/candidates/:id", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 
@@ -94,7 +94,7 @@ router.get("/candidates/:id", async (req, res): Promise<void> => {
   });
 });
 
-router.post("/candidates/:id/recover", async (req, res): Promise<void> => {
+router.post("/candidates/:id/recover", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 

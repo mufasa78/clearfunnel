@@ -1,10 +1,10 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response } from "express";
 import { db, decisionsTable, candidatesTable, alertsTable, filterRulesTable, validationRunsTable, rolesTable, decisionRulesTable } from "@workspace/db";
 import { eq, and, count, sql, inArray } from "drizzle-orm";
 
-const router: IRouter = Router();
+const router = Router();
 
-router.get("/dashboard/summary", async (req, res): Promise<void> => {
+router.get("/dashboard/summary", async (req: Request, res: Response): Promise<void> => {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -88,7 +88,7 @@ router.get("/dashboard/summary", async (req, res): Promise<void> => {
   });
 });
 
-router.get("/dashboard/rejection-rates", async (req, res): Promise<void> => {
+router.get("/dashboard/rejection-rates", async (req: Request, res: Response): Promise<void> => {
   const { days = "30" } = req.query;
   const daysNum = parseInt(days as string, 10);
   const since = new Date(Date.now() - daysNum * 24 * 60 * 60 * 1000);
@@ -132,7 +132,7 @@ router.get("/dashboard/rejection-rates", async (req, res): Promise<void> => {
   res.json(result);
 });
 
-router.get("/dashboard/rule-impact", async (req, res): Promise<void> => {
+router.get("/dashboard/rule-impact", async (req: Request, res: Response): Promise<void> => {
   const ruleRows = await db.select({
     ruleId: decisionRulesTable.ruleId,
     ruleName: decisionRulesTable.ruleName,

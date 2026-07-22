@@ -1,10 +1,10 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response } from "express";
 import { db, filterRulesTable, ruleHistoryTable, rolesTable, validationRunsTable, validationResultsTable, benchmarkResumesTable } from "@workspace/db";
 import { eq, and, sql, inArray } from "drizzle-orm";
 
-const router: IRouter = Router();
+const router = Router();
 
-router.get("/rules", async (req, res): Promise<void> => {
+router.get("/rules", async (req: Request, res: Response): Promise<void> => {
   const { status, roleId } = req.query;
 
   let conditions: any[] = [];
@@ -39,7 +39,7 @@ router.get("/rules", async (req, res): Promise<void> => {
   })));
 });
 
-router.post("/rules", async (req, res): Promise<void> => {
+router.post("/rules", async (req: Request, res: Response): Promise<void> => {
   const { name, description, ruleType, criteria, roleId, createdBy } = req.body;
   if (!name || !description || !ruleType || !criteria || !createdBy) {
     res.status(400).json({ error: "name, description, ruleType, criteria, createdBy are required" });
@@ -79,7 +79,7 @@ router.post("/rules", async (req, res): Promise<void> => {
   });
 });
 
-router.get("/rules/:id", async (req, res): Promise<void> => {
+router.get("/rules/:id", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 
@@ -140,7 +140,7 @@ router.get("/rules/:id", async (req, res): Promise<void> => {
   });
 });
 
-router.patch("/rules/:id", async (req, res): Promise<void> => {
+router.patch("/rules/:id", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 
@@ -195,14 +195,14 @@ router.patch("/rules/:id", async (req, res): Promise<void> => {
   });
 });
 
-router.delete("/rules/:id", async (req, res): Promise<void> => {
+router.delete("/rules/:id", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
   await db.update(filterRulesTable).set({ status: "archived" }).where(eq(filterRulesTable.id, id));
   res.json({ success: true });
 });
 
-router.post("/rules/:id/validate", async (req, res): Promise<void> => {
+router.post("/rules/:id/validate", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const ruleId = parseInt(raw, 10);
 

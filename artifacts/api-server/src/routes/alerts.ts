@@ -1,10 +1,10 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response } from "express";
 import { db, alertsTable, rolesTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 
-const router: IRouter = Router();
+const router = Router();
 
-router.get("/alerts", async (req, res): Promise<void> => {
+router.get("/alerts", async (req: Request, res: Response): Promise<void> => {
   const { status, roleId } = req.query;
 
   let conditions: any[] = [];
@@ -37,7 +37,7 @@ router.get("/alerts", async (req, res): Promise<void> => {
   })));
 });
 
-router.patch("/alerts/:id", async (req, res): Promise<void> => {
+router.patch("/alerts/:id", async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 
