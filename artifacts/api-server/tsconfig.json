@@ -5,11 +5,7 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "outDir": "dist",
     "rootDir": "src",
-    "types": ["node"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": false,
-    "noEmit": false
+    "types": ["node"]
   },
   "include": ["src"],
   "references": [

@@ -1,64 +1,45 @@
-# ClearFunnel
+# [Project name]
 
-An ATS Decision Governance Layer — a SaaS platform that sits alongside a company's existing ATS to validate filter rules before they go live, log every auto-rejection with a traceable reason, monitor rejection patterns for anomalies, and recover wrongly-filtered candidates.
+_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+
+## Run & Operate
+
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm run typecheck` — full typecheck across all packages
+- `pnpm run build` — typecheck + build all packages
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack
 
-- **Frontend:** React 19 + Vite + Tailwind CSS v4 + shadcn/ui (artifact: `artifacts/clearfunnel`)
-- **Backend:** Express 5 API server (artifact: `artifacts/api-server`)
-- **Database:** PostgreSQL via Drizzle ORM (lib: `lib/db`)
-- **Routing:** Wouter (client-side)
-- **State:** TanStack Query + generated API client (`lib/api-client-react`)
+- pnpm workspaces, Node.js 24, TypeScript 5.9
+- API: Express 5
+- DB: PostgreSQL + Drizzle ORM
+- Validation: Zod (`zod/v4`), `drizzle-zod`
+- API codegen: Orval (from OpenAPI spec)
+- Build: esbuild (CJS bundle)
 
-## Project Structure
+## Where things live
 
-```
-artifacts/
-  clearfunnel/       React + Vite frontend (preview path: /)
-  api-server/        Express API server (preview path: /api)
-  mockup-sandbox/    Design/canvas sandbox (preview path: /__mockup)
-lib/
-  db/                Drizzle ORM schema + PostgreSQL client
-  api-spec/          OpenAPI spec + Orval codegen config
-  api-client-react/  Generated React Query hooks
-  api-zod/           Generated Zod validators
-```
+_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
 
-## How to Run
+## Architecture decisions
 
-All services are managed by Replit workflows:
+_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
 
-| Workflow | Command |
-|---|---|
-| `artifacts/clearfunnel: web` | `pnpm --filter @workspace/clearfunnel run dev` |
-| `artifacts/api-server: API Server` | `pnpm --filter @workspace/api-server run dev` |
+## Product
 
-The database (`DATABASE_URL`) is auto-provisioned by Replit — no manual setup needed.
+_Describe the high-level user-facing capabilities of this app once they exist._
 
-### Database schema
+## User preferences
 
-To push schema changes to the development database:
-```bash
-pnpm --filter @workspace/db run push
-```
+_Populate as you build — explicit user instructions worth remembering across sessions._
 
-## Pages
+## Gotchas
 
-### Marketing
-- `/` — Home
-- `/pricing` — Pricing
-- `/how-it-works` — How It Works
-- `/about` — About
+_Populate as you build — sharp edges, "always run X before Y" rules._
 
-### App (dashboard)
-- `/dashboard` — Overview metrics
-- `/rules` — Filter rule management
-- `/decisions` — Auto-rejection log
-- `/candidates` — Candidate recovery pool
-- `/alerts` — Anomaly alerts
-- `/validation` — Rule validation harness
-- `/settings` — Settings
+## Pointers
 
-## User Preferences
-
-<!-- Add user preferences here as they are expressed -->
+- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
