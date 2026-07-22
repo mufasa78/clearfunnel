@@ -1,0 +1,1 @@
+- [Convex esbuild externals](convex-esbuild.md) — convex and convex/* must be in the externals list in artifacts/api-server/build.mjs or the build fails
