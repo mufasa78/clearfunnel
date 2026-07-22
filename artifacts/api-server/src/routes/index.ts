@@ -1,4 +1,5 @@
 import { Router } from "express";
+import authRouter from "./auth.js";
 import healthRouter from "./health.js";
 import rolesRouter from "./roles.js";
 import rulesRouter from "./rules.js";
@@ -11,6 +12,7 @@ import dashboardRouter from "./dashboard.js";
 
 const router = Router();
 
+router.use("/auth", authRouter);
 router.use(healthRouter);
 router.use(rolesRouter);
 router.use(rulesRouter);
