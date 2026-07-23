@@ -2,11 +2,15 @@
   "buildCommand": "pnpm run build",
   "devCommand": "pnpm --filter @workspace/clearfunnel run dev",
   "installCommand": "pnpm install",
-  "outputDirectory": "artifacts/clearfunnel/dist",
+  "outputDirectory": "artifacts/clearfunnel/dist/public",
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "destination": "/api"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
