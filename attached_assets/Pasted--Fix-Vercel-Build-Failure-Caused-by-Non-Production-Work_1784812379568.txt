@@ -1,0 +1,162 @@
+# Fix Vercel Build Failure Caused by Non-Production Workspace
+
+The project has progressed significantly.
+
+**Current Status**
+
+* ✅ All TypeScript checks pass.
+* ✅ API server typechecks successfully.
+* ✅ Frontend typechecks successfully.
+* ❌ Deployment now fails because the build process attempts to build a development-only workspace.
+
+The failure is:
+
+```
+artifacts/mockup-sandbox build
+
+Error:
+BASE_PATH environment variable is required but was not provided.
+```
+
+This indicates that Vercel is attempting to build a sandbox/demo application that should not be part of the production deployment.
+
+---
+
+# Objective
+
+Make the production deployment succeed **without breaking local development**.
+
+---
+
+# Step 1 — Audit the Monorepo
+
+Review the workspace structure.
+
+Determine:
+
+* which workspace is the production application
+* which workspaces are demos
+* which workspaces are experiments
+* which workspaces are internal tooling
+* which workspaces should never be deployed
+
+Do **not** assume every workspace should be built.
+
+---
+
+# Step 2 — Investigate Why mockup-sandbox Is Being Built
+
+Find why this command includes it:
+
+```
+pnpm -r --if-present run build
+```
+
+or
+
+```
+pnpm recursive build
+```
+
+Determine whether:
+
+* the root build script is too broad
+* the workspace filters are incorrect
+* the sandbox package is incorrectly marked as production
+* Vercel is building every workspace unnecessarily
+
+---
+
+# Step 3 — Exclude Development Workspaces From Production Builds
+
+The production deployment should only build the applications required for deployment.
+
+Development-only workspaces such as:
+
+```
+artifacts/mockup-sandbox
+```
+
+must **not** run during Vercel deployment.
+
+Use the cleanest solution available.
+
+Possible approaches include:
+
+* updating recursive workspace filters
+* modifying root build scripts
+* using pnpm filtering
+* adjusting workspace configuration
+* changing the Vercel build command if appropriate
+
+Do **not** simply delete the workspace.
+
+---
+
+# Step 4 — Handle BASE_PATH Properly
+
+Investigate why the sandbox requires:
+
+```
+BASE_PATH
+```
+
+If the sandbox is intended only for local development:
+
+* prevent it from building in production.
+
+If it is intended to be deployable:
+
+* provide a safe default
+* or gracefully handle a missing environment variable.
+
+Do **not** crash the entire production deployment because of a development-only configuration.
+
+---
+
+# Step 5 — Review Vercel Configuration
+
+Inspect:
+
+* vercel.json
+* package.json
+* workspace package.json files
+* pnpm-workspace.yaml
+
+Ensure the production deployment only targets the intended application(s).
+
+---
+
+# Step 6 — Preserve Existing Behavior
+
+Do not:
+
+* remove the sandbox
+* delete features
+* change production functionality
+* introduce hacks
+
+The solution should preserve local development while making production deployments reliable.
+
+---
+
+# Step 7 — Validate
+
+Before completing:
+
+* Run the full production build exactly as Vercel does.
+* Confirm that only the required workspaces are built.
+* Confirm that the deployment completes successfully.
+* Confirm that local development still works for every workspace.
+
+---
+
+# Deliverables
+
+Provide:
+
+1. Every file changed.
+2. Why each change was necessary.
+3. Why the previous build included `mockup-sandbox`.
+4. Why the new build process is the correct architecture for a PNPM monorepo.
+5. Confirmation that the production deployment now ignores development-only workspaces while preserving local development.
