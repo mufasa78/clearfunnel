@@ -9,6 +9,7 @@ import decisionsRouter from "./decisions.js";
 import candidatesRouter from "./candidates.js";
 import alertsRouter from "./alerts.js";
 import dashboardRouter from "./dashboard.js";
+import governanceRouter from "./governance.js";
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use(decisionsRouter);
 router.use(candidatesRouter);
 router.use(alertsRouter);
 router.use(dashboardRouter);
+router.use(governanceRouter);
 
 export default router;

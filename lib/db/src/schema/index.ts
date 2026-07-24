@@ -5,3 +5,4 @@ export * from "./validation_runs";
 export * from "./candidates";
 export * from "./decisions";
 export * from "./alerts";
+export * from "./governance";

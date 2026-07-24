@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { rolesTable } from "./roles";
@@ -17,6 +17,14 @@ export const filterRulesTable = pgTable("filter_rules", {
   createdBy: text("created_by").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+
+  // Performance tracking
+  triggeredCount: integer("triggered_count").notNull().default(0),
+  correctCount: integer("correct_count").notNull().default(0),
+  falsePositiveCount: integer("false_positive_count").notNull().default(0),
+  falseNegativeCount: integer("false_negative_count").notNull().default(0),
+  weightPercent: integer("weight_percent").notNull().default(50), // 0–100 importance weight
+  optimizerRecommendation: text("optimizer_recommendation"),       // suggestion from rule optimizer
 });
 
 export const ruleHistoryTable = pgTable("rule_history", {

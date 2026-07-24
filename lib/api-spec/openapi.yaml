@@ -3,7 +3,7 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: ClearFunnel ATS Decision Governance API
+  description: ClearFunnel Hiring Governance Platform API
 servers:
   - url: /api
     description: Base API path
@@ -26,6 +26,8 @@ tags:
     description: Job Roles
   - name: dashboard
     description: Dashboard summaries
+  - name: governance
+    description: Governance intelligence
 
 paths:
   /healthz:
@@ -100,7 +102,7 @@ paths:
     get:
       operationId: listRules
       tags: [rules]
-      summary: List all filter rules (Rule Registry)
+      summary: List all filter rules with performance metrics
       parameters:
         - name: status
           in: query
@@ -113,13 +115,11 @@ paths:
             type: integer
       responses:
         "200":
-          description: List of rules
+          description: Rules with performance summary
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/FilterRule"
+                $ref: "#/components/schemas/RuleListResponse"
     post:
       operationId: createRule
       tags: [rules]
@@ -142,7 +142,7 @@ paths:
     get:
       operationId: getRule
       tags: [rules]
-      summary: Get a filter rule with version history
+      summary: Get a filter rule with version history and validation runs
       parameters:
         - name: id
           in: path
@@ -161,7 +161,7 @@ paths:
     patch:
       operationId: updateRule
       tags: [rules]
-      summary: Update a filter rule (triggers validation)
+      summary: Update a filter rule
       parameters:
         - name: id
           in: path
@@ -314,7 +314,7 @@ paths:
     get:
       operationId: listDecisions
       tags: [decisions]
-      summary: List all auto-rejection decisions
+      summary: List all auto-rejection decisions with confidence scores
       parameters:
         - name: roleId
           in: query
@@ -340,56 +340,18 @@ paths:
             default: 0
       responses:
         "200":
-          description: List of decisions
+          description: Decisions with confidence summary
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DecisionList"
-    post:
-      operationId: createDecision
-      tags: [decisions]
-      summary: Log an ATS rejection decision
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/DecisionInput"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Decision"
-
-  /decisions/{id}:
-    get:
-      operationId: getDecision
-      tags: [decisions]
-      summary: Get a decision with full rule trace
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Decision detail
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Decision"
-        "404":
-          description: Not found
+                $ref: "#/components/schemas/DecisionListResponse"
 
   # ─── Candidates (Recovery Pool) ───────────────────────────────
   /candidates:
     get:
       operationId: listCandidates
       tags: [candidates]
-      summary: List recoverable candidates
+      summary: List recoverable candidates sorted by Recovery Score
       parameters:
         - name: roleId
           in: query
@@ -405,7 +367,7 @@ paths:
             type: string
       responses:
         "200":
-          description: List of candidates
+          description: List of candidates with recovery scores
           content:
             application/json:
               schema:
@@ -417,7 +379,7 @@ paths:
     get:
       operationId: getCandidate
       tags: [candidates]
-      summary: Get a candidate with their rejection history
+      summary: Get a candidate with their rejection history and score breakdown
       parameters:
         - name: id
           in: path
@@ -426,7 +388,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: Candidate detail
+          description: Candidate detail with score breakdown
           content:
             application/json:
               schema:
@@ -464,7 +426,7 @@ paths:
     get:
       operationId: listAlerts
       tags: [alerts]
-      summary: List anomaly alerts
+      summary: List anomaly alerts with statistical data
       parameters:
         - name: status
           in: query
@@ -477,13 +439,11 @@ paths:
             type: integer
       responses:
         "200":
-          description: List of alerts
+          description: Alerts with anomaly summary
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Alert"
+                $ref: "#/components/schemas/AlertListResponse"
 
   /alerts/{id}:
     patch:
@@ -515,10 +475,10 @@ paths:
     get:
       operationId: getDashboardSummary
       tags: [dashboard]
-      summary: High-level stats for the dashboard overview
+      summary: High-level stats including Governance Score and ATS Health
       responses:
         "200":
-          description: Dashboard summary
+          description: Dashboard summary with intelligence scores
           content:
             application/json:
               schema:
@@ -549,16 +509,56 @@ paths:
     get:
       operationId: getRuleImpact
       tags: [dashboard]
-      summary: Which rules are rejecting the most candidates
+      summary: Which rules are rejecting the most candidates, with accuracy
       responses:
         "200":
-          description: Rule impact breakdown
+          description: Rule impact breakdown with performance metrics
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/RuleImpact"
+
+  # ─── Governance ───────────────────────────────────────────────
+  /governance/score:
+    get:
+      operationId: getGovernanceScore
+      tags: [governance]
+      summary: Current Governance Score with historical trend and component breakdown
+      responses:
+        "200":
+          description: Governance score data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GovernanceScoreResponse"
+
+  /governance/recruiter-stats:
+    get:
+      operationId: getRecruiterStats
+      tags: [governance]
+      summary: Recruiter consistency scores and anomaly flags
+      responses:
+        "200":
+          description: Recruiter consistency data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecruiterStatsResponse"
+
+  /governance/bias-analysis:
+    get:
+      operationId: getBiasAnalysis
+      tags: [governance]
+      summary: Bias risk detection across candidate groups
+      responses:
+        "200":
+          description: Bias analysis data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BiasAnalysisResponse"
 
 components:
   schemas:
@@ -598,10 +598,10 @@ components:
         department:
           type: string
 
-    # ─── Filter Rules ──────────────────────────────────────────
+    # ─── Filter Rules ────────────────────────────────────────────
     FilterRule:
       type: object
-      required: [id, name, description, ruleType, status, version, createdAt, updatedAt]
+      required: [id, name, description, ruleType, criteria, status, version, createdBy, createdAt, updatedAt]
       properties:
         id:
           type: integer
@@ -614,7 +614,6 @@ components:
           enum: [keyword_match, employment_gap, degree_requirement, experience_years, location, custom]
         criteria:
           type: string
-          description: Plain-language criteria definition
         status:
           type: string
           enum: [active, archived, pending_validation]
@@ -638,37 +637,57 @@ components:
         updatedAt:
           type: string
           format: date-time
-
-    FilterRuleInput:
-      type: object
-      required: [name, description, ruleType, criteria, createdBy]
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        ruleType:
-          type: string
-          enum: [keyword_match, employment_gap, degree_requirement, experience_years, location, custom]
-        criteria:
-          type: string
-        roleId:
+        # Performance metrics
+        triggeredCount:
           type: integer
-        createdBy:
+        correctCount:
+          type: integer
+        falsePositiveCount:
+          type: integer
+        falseNegativeCount:
+          type: integer
+        weightPercent:
+          type: integer
+          description: Rule importance weight 0-100
+        accuracyScore:
+          type: number
+          description: Percentage of triggered decisions that were correct
+        fpRate:
+          type: number
+          description: False positive rate as a percentage
+        fnRate:
+          type: number
+          description: False negative rate as a percentage
+        riskLevel:
           type: string
+          enum: [low, medium, high, critical]
+        optimizerRecommendation:
+          type: ["string", "null"]
+          description: AI-generated suggestion to improve this rule
 
-    FilterRuleUpdate:
+    RuleListResponse:
       type: object
+      required: [rules, summary]
       properties:
-        name:
-          type: string
-        description:
-          type: string
-        criteria:
-          type: string
-        status:
-          type: string
-          enum: [active, archived]
+        rules:
+          type: array
+          items:
+            $ref: "#/components/schemas/FilterRule"
+        summary:
+          type: object
+          properties:
+            totalRules:
+              type: integer
+            activeRules:
+              type: integer
+            avgAccuracy:
+              type: number
+            totalTriggered:
+              type: integer
+            highRiskRules:
+              type: integer
+            rulesNeedingAttention:
+              type: integer
 
     FilterRuleDetail:
       type: object
@@ -685,24 +704,56 @@ components:
           items:
             $ref: "#/components/schemas/ValidationRun"
 
+    FilterRuleInput:
+      type: object
+      required: [name, description, ruleType, criteria, createdBy]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        ruleType:
+          type: string
+        criteria:
+          type: string
+        roleId:
+          type: integer
+        createdBy:
+          type: string
+        weightPercent:
+          type: integer
+
+    FilterRuleUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        criteria:
+          type: string
+        status:
+          type: string
+        weightPercent:
+          type: integer
+        changedBy:
+          type: string
+
     RuleHistoryEntry:
       type: object
-      required: [id, version, changedAt, changedBy, changes]
+      required: [version, changedBy, changes, changedAt]
       properties:
-        id:
-          type: integer
         version:
           type: integer
-        changedAt:
-          type: string
-          format: date-time
         changedBy:
           type: string
         changes:
           type: string
-          description: Human-readable description of what changed
+        changedAt:
+          type: string
+          format: date-time
 
-    # ─── Validation ────────────────────────────────────────────
+    # ─── Validation ──────────────────────────────────────────────
     ValidationRun:
       type: object
       required: [id, ruleId, status, benchmarkCount, passCount, failCount, startedAt]
@@ -712,7 +763,7 @@ components:
         ruleId:
           type: integer
         ruleName:
-          type: string
+          type: ["string", "null"]
         status:
           type: string
           enum: [pending, running, passed, failed]
@@ -722,6 +773,12 @@ components:
           type: integer
         failCount:
           type: integer
+        passRate:
+          type: number
+          description: Pass percentage
+        validationConfidence:
+          type: integer
+          description: 0-100 confidence in this validation result
         overrideJustification:
           type: ["string", "null"]
         overriddenBy:
@@ -732,6 +789,10 @@ components:
         completedAt:
           type: ["string", "null"]
           format: date-time
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationResult"
 
     ValidationRunDetail:
       type: object
@@ -746,10 +807,8 @@ components:
 
     ValidationResult:
       type: object
-      required: [id, benchmarkResumeId, candidateName, expectedOutcome, actualOutcome, passed]
+      required: [benchmarkResumeId, candidateName, expectedOutcome, actualOutcome, passed]
       properties:
-        id:
-          type: integer
         benchmarkResumeId:
           type: integer
         candidateName:
@@ -765,10 +824,10 @@ components:
         failReason:
           type: ["string", "null"]
 
-    # ─── Benchmark Resumes ─────────────────────────────────────
+    # ─── Benchmark Resumes ───────────────────────────────────────
     BenchmarkResume:
       type: object
-      required: [id, candidateName, scenario, expectedOutcome, background, createdAt]
+      required: [id, candidateName, scenario, expectedOutcome, background, tags, createdAt]
       properties:
         id:
           type: integer
@@ -776,13 +835,11 @@ components:
           type: string
         scenario:
           type: string
-          description: Short label like "career changer", "employment gap", "non-traditional path"
         expectedOutcome:
           type: string
           enum: [pass, fail]
         background:
           type: string
-          description: Summary of candidate background
         tags:
           type: array
           items:
@@ -809,7 +866,24 @@ components:
           items:
             type: string
 
-    # ─── Decisions ─────────────────────────────────────────────
+    # ─── Decisions ───────────────────────────────────────────────
+    TriggeredRule:
+      type: object
+      required: [ruleId, ruleName, ruleDescription]
+      properties:
+        ruleId:
+          type: integer
+        ruleName:
+          type: string
+        ruleDescription:
+          type: string
+        ruleAccuracy:
+          type: ["number", "null"]
+        fpRate:
+          type: ["number", "null"]
+        weightPercent:
+          type: ["integer", "null"]
+
     Decision:
       type: object
       required: [id, candidateId, candidateName, roleId, roleName, triggeredRules, rejectionSummary, rejectedAt, recoverable, recovered]
@@ -830,7 +904,6 @@ components:
             $ref: "#/components/schemas/TriggeredRule"
         rejectionSummary:
           type: string
-          description: Plain-language explanation of why this candidate was rejected
         rejectedAt:
           type: string
           format: date-time
@@ -843,43 +916,58 @@ components:
           format: date-time
         recoveredBy:
           type: ["string", "null"]
+        # Intelligence fields
+        confidenceScore:
+          type: ["integer", "null"]
+          description: 0-100 Decision Confidence Score
+        evidenceStrength:
+          type: ["string", "null"]
+          enum: [strong, moderate, weak, null]
+        evidenceCount:
+          type: ["integer", "null"]
+        recruiterId:
+          type: ["string", "null"]
 
-    DecisionList:
+    DecisionListResponse:
       type: object
-      required: [items, total]
+      required: [decisions, total]
       properties:
-        items:
+        decisions:
           type: array
           items:
             $ref: "#/components/schemas/Decision"
         total:
           type: integer
+        summary:
+          type: object
+          properties:
+            avgConfidence:
+              type: integer
+            strongDecisions:
+              type: integer
+            weakDecisions:
+              type: integer
+            strongPct:
+              type: integer
+            weakPct:
+              type: integer
 
     DecisionInput:
       type: object
-      required: [candidateId, roleId, triggeredRuleIds]
+      required: [candidateId, roleId, rejectionSummary]
       properties:
         candidateId:
           type: integer
         roleId:
           type: integer
-        triggeredRuleIds:
-          type: array
-          items:
-            type: integer
-
-    TriggeredRule:
-      type: object
-      required: [ruleId, ruleName, ruleDescription]
-      properties:
-        ruleId:
-          type: integer
-        ruleName:
+        rejectionSummary:
           type: string
-        ruleDescription:
+        recoverable:
+          type: boolean
+        recruiterId:
           type: string
 
-    # ─── Candidates ────────────────────────────────────────────
+    # ─── Candidates ──────────────────────────────────────────────
     Candidate:
       type: object
       required: [id, name, email, roleId, roleName, rejectedAt, recovered, retentionExpiresAt]
@@ -894,6 +982,8 @@ components:
           type: integer
         roleName:
           type: string
+        department:
+          type: ["string", "null"]
         rejectionSummary:
           type: string
         rejectedAt:
@@ -911,10 +1001,51 @@ components:
         retentionExpiresAt:
           type: string
           format: date-time
+        # Intelligence fields
+        recoveryScore:
+          type: ["integer", "null"]
+          description: 0-100 Recovery Score — higher = more likely a wrongful rejection
+        skillMatch:
+          type: ["integer", "null"]
+        experienceMatch:
+          type: ["integer", "null"]
+        educationMatch:
+          type: ["integer", "null"]
+        rejectionConfidence:
+          type: ["integer", "null"]
+          description: ATS confidence that the rejection was correct (lower = more likely wrong)
+        yearsExperience:
+          type: ["integer", "null"]
+        educationLevel:
+          type: ["string", "null"]
+          enum: [high_school, bachelors, masters, phd, null]
+        skills:
+          type: array
+          items:
+            type: string
+        recruiterRecommendation:
+          type: ["string", "null"]
+          enum: [recover, review, reject, null]
+        similarityWarning:
+          type: ["string", "null"]
+          description: Similarity to top performers warning
+
+    ScoreComponent:
+      type: object
+      required: [label, value, weight, contribution]
+      properties:
+        label:
+          type: string
+        value:
+          type: integer
+        weight:
+          type: integer
+        contribution:
+          type: integer
 
     CandidateDetail:
       type: object
-      required: [candidate, decisions]
+      required: [candidate, decisions, scoreBreakdown]
       properties:
         candidate:
           $ref: "#/components/schemas/Candidate"
@@ -922,6 +1053,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Decision"
+        scoreBreakdown:
+          type: object
+          properties:
+            recoveryScore:
+              type: integer
+            components:
+              type: array
+              items:
+                $ref: "#/components/schemas/ScoreComponent"
+            recommendation:
+              type: string
+              enum: [recover, review, reject]
+            explanation:
+              type: string
 
     RecoveryInput:
       type: object
@@ -932,7 +1077,7 @@ components:
         reason:
           type: string
 
-    # ─── Alerts ────────────────────────────────────────────────
+    # ─── Alerts ──────────────────────────────────────────────────
     Alert:
       type: object
       required: [id, roleId, roleName, alertType, severity, message, status, detectedAt]
@@ -945,7 +1090,7 @@ components:
           type: string
         alertType:
           type: string
-          enum: [rejection_spike, rejection_drop, validation_failure, rule_change]
+          enum: [rejection_spike, rejection_drop, validation_failure, rule_change, recruiter_anomaly, bias_detected]
         severity:
           type: string
           enum: [low, medium, high, critical]
@@ -966,9 +1111,49 @@ components:
           format: date-time
         resolvedBy:
           type: ["string", "null"]
+        # Anomaly detection fields
+        zScore:
+          type: ["number", "null"]
+          description: Statistical deviation from baseline (σ)
+        baselineRate:
+          type: ["number", "null"]
+          description: Normal rejection rate (%)
+        currentRate:
+          type: ["number", "null"]
+          description: Current anomalous rate (%)
+        recruiterId:
+          type: ["string", "null"]
+        affectedCandidates:
+          type: ["integer", "null"]
+        anomalyLabel:
+          type: ["string", "null"]
+          description: Human-readable anomaly description e.g. "3.4σ above baseline"
+
+    AlertListResponse:
+      type: object
+      required: [alerts, summary]
+      properties:
+        alerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Alert"
+        summary:
+          type: object
+          properties:
+            totalOpen:
+              type: integer
+            criticalCount:
+              type: integer
+            highCount:
+              type: integer
+            avgZScore:
+              type: ["number", "null"]
+            totalAffectedCandidates:
+              type: integer
 
     AlertUpdate:
       type: object
+      required: [status]
       properties:
         status:
           type: string
@@ -976,16 +1161,68 @@ components:
         resolvedBy:
           type: string
 
-    # ─── Dashboard ─────────────────────────────────────────────
+    # ─── Dashboard ───────────────────────────────────────────────
+    RecentDecision:
+      type: object
+      properties:
+        id:
+          type: integer
+        candidateId:
+          type: integer
+        candidateName:
+          type: string
+        roleId:
+          type: integer
+        roleName:
+          type: string
+        triggeredRules:
+          type: array
+          items:
+            $ref: "#/components/schemas/TriggeredRule"
+        rejectionSummary:
+          type: string
+        rejectedAt:
+          type: string
+        recoverable:
+          type: boolean
+        recovered:
+          type: boolean
+        recoveredAt:
+          type: ["string", "null"]
+        recoveredBy:
+          type: ["string", "null"]
+        confidenceScore:
+          type: ["integer", "null"]
+        evidenceStrength:
+          type: ["string", "null"]
+
+    GovernanceComponents:
+      type: object
+      properties:
+        ruleAccuracy:
+          type: integer
+        falseRejectionRate:
+          type: number
+        recoverySuccessRate:
+          type: integer
+        recruiterConsistency:
+          type: integer
+        explainabilityCoverage:
+          type: integer
+        biasRisk:
+          type: number
+        validationPassRate:
+          type: integer
+
     DashboardSummary:
       type: object
-      required: [totalRejections, rejectionRateToday, recoverableCandidates, openAlerts, activeRules, pendingValidations, validationPassRate, recentDecisions, recentAlerts]
+      required: [totalRejections, recoverableCandidates, openAlerts, activeRules, pendingValidations, validationPassRate]
       properties:
+        # Core counts
         totalRejections:
           type: integer
         rejectionRateToday:
           type: number
-          description: Percentage 0-100
         recoverableCandidates:
           type: integer
         openAlerts:
@@ -996,11 +1233,37 @@ components:
           type: integer
         validationPassRate:
           type: number
-          description: Percentage 0-100
+        # Intelligence scores
+        governanceScore:
+          type: integer
+          description: 0-100 Governance Score
+        atsHealthScore:
+          type: integer
+          description: 0-100 ATS Health Score
+        governanceLabel:
+          type: string
+        avgRuleAccuracy:
+          type: number
+        highRiskRules:
+          type: integer
+        recoverySuccessRate:
+          type: integer
+        # Financial impact
+        estimatedRevenueLost:
+          type: integer
+          description: Estimated USD lost to false rejections per month
+        talentLossCost:
+          type: integer
+        recruiterReworkCost:
+          type: integer
+        falseRejectionCount:
+          type: integer
+        governanceComponents:
+          $ref: "#/components/schemas/GovernanceComponents"
         recentDecisions:
           type: array
           items:
-            $ref: "#/components/schemas/Decision"
+            $ref: "#/components/schemas/RecentDecision"
         recentAlerts:
           type: array
           items:
@@ -1023,6 +1286,8 @@ components:
           type: integer
         totalRejections:
           type: integer
+        avgConfidence:
+          type: integer
 
     RuleImpact:
       type: object
@@ -1038,3 +1303,133 @@ components:
           type: integer
         percentageOfAll:
           type: number
+        accuracyScore:
+          type: number
+        falsePositiveCount:
+          type: integer
+        fpRate:
+          type: number
+        optimizerRecommendation:
+          type: ["string", "null"]
+
+    # ─── Governance ──────────────────────────────────────────────
+    GovernanceTrendPoint:
+      type: object
+      required: [date, governanceScore, atsHealthScore]
+      properties:
+        date:
+          type: string
+          format: date
+        governanceScore:
+          type: integer
+        atsHealthScore:
+          type: integer
+
+    FinancialImpact:
+      type: object
+      required: [talentLossCost, recruiterReworkCost, totalCost]
+      properties:
+        talentLossCost:
+          type: integer
+        recruiterReworkCost:
+          type: integer
+        totalCost:
+          type: integer
+
+    GovernanceScoreResponse:
+      type: object
+      required: [governanceScore, atsHealthScore, trend]
+      properties:
+        governanceScore:
+          type: integer
+        atsHealthScore:
+          type: integer
+        components:
+          $ref: "#/components/schemas/GovernanceComponents"
+        trend:
+          type: array
+          items:
+            $ref: "#/components/schemas/GovernanceTrendPoint"
+        financialImpact:
+          $ref: "#/components/schemas/FinancialImpact"
+        estimatedRevenueLost:
+          type: integer
+        falseRejectionCount:
+          type: integer
+
+    RecruiterStat:
+      type: object
+      required: [recruiterId, recruiterName, totalDecisions, rejectionRate, consistencyScore, zScore]
+      properties:
+        recruiterId:
+          type: string
+        recruiterName:
+          type: string
+        department:
+          type: ["string", "null"]
+        totalDecisions:
+          type: integer
+        rejectionRate:
+          type: number
+        recoveryRate:
+          type: number
+        consistencyScore:
+          type: integer
+          description: 0-100, higher = more consistent with team
+        zScore:
+          type: number
+          description: Standard deviations from team mean rejection rate
+        flagged:
+          type: ["string", "null"]
+          enum: [inconsistent, bias_risk, overriding_rules, null]
+
+    RecruiterStatsResponse:
+      type: object
+      required: [recruiters, teamMeanRejectionRate, teamStdDev, teamConsistencyScore]
+      properties:
+        teamMeanRejectionRate:
+          type: number
+        teamStdDev:
+          type: number
+        teamConsistencyScore:
+          type: integer
+        recruiters:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecruiterStat"
+
+    BiasGroup:
+      type: object
+      required: [group, total, rejectionRate]
+      properties:
+        group:
+          type: string
+        total:
+          type: integer
+        rejectionRate:
+          type: number
+
+    BiasDimension:
+      type: object
+      required: [name, risk, breakdown]
+      properties:
+        name:
+          type: string
+        risk:
+          type: integer
+        breakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/BiasGroup"
+
+    BiasAnalysisResponse:
+      type: object
+      required: [biasRisk, dimensions]
+      properties:
+        biasRisk:
+          type: integer
+          description: 0-100 overall bias risk score
+        dimensions:
+          type: array
+          items:
+            $ref: "#/components/schemas/BiasDimension"

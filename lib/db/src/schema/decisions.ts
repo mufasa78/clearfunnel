@@ -14,6 +14,12 @@ export const decisionsTable = pgTable("decisions", {
   recoveredAt: timestamp("recovered_at", { withTimezone: true }),
   recoveredBy: text("recovered_by"),
   rejectedAt: timestamp("rejected_at", { withTimezone: true }).notNull().defaultNow(),
+
+  // Intelligence fields
+  confidenceScore: integer("confidence_score"),    // 0–100 decision confidence
+  evidenceCount: integer("evidence_count"),        // number of rules triggered
+  recruiterId: text("recruiter_id"),               // who processed this decision
+  evidenceStrength: text("evidence_strength"),     // strong | moderate | weak
 });
 
 export const decisionRulesTable = pgTable("decision_rules", {
