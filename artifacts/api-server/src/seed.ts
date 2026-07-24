@@ -42,14 +42,20 @@ async function main() {
   // ─── Roles ─────────────────────────────────────────────────────────────
   log("Seeding roles...");
   const roleData = [
-    { name: "Senior Software Engineer", department: "Engineering" },
+    { name: "Senior Backend Engineer", department: "Engineering" },
+    { name: "Senior Frontend Engineer", department: "Engineering" },
+    { name: "DevOps Engineer", department: "Engineering" },
     { name: "Product Manager", department: "Product" },
     { name: "Sales Account Executive", department: "Sales" },
-    { name: "UX Designer", department: "Design" },
-    { name: "Data Scientist", department: "Data" },
+    { name: "Sales Development Rep", department: "Sales" },
+    { name: "UX Designer", department: "Marketing" },
+    { name: "UI Designer", department: "Marketing" },
     { name: "Marketing Manager", department: "Marketing" },
-    { name: "DevOps Engineer", department: "Engineering" },
+    { name: "Data Scientist", department: "Engineering" },
     { name: "Financial Analyst", department: "Finance" },
+    { name: "Operations Manager", department: "Operations" },
+    { name: "Customer Success Manager", department: "Operations" },
+    { name: "HR Business Partner", department: "Operations" },
   ];
   const roles = await db.insert(rolesTable).values(roleData).returning();
   log(`  → ${roles.length} roles`);
@@ -58,124 +64,84 @@ async function main() {
   log("Seeding filter rules...");
   const rulesData = [
     {
-      name: "Minimum 5 Years Experience",
-      description: "Candidates must have at least 5 years of relevant work experience",
-      ruleType: "experience_years", criteria: "years_experience >= 5",
-      status: "active", version: 3, createdBy: "sarah.chen@corp.com",
-      triggeredCount: 2340, correctCount: 1930, falsePositiveCount: 410, falseNegativeCount: 62,
+      name: "Missing Required Skill",
+      description: "Candidates must have all required skills for the role",
+      ruleType: "keyword_match", criteria: "skills CONTAINS required_skill",
+      status: "active", version: 4, createdBy: "sarah.kim@corp.com",
+      triggeredCount: 421, correctCount: 395, falsePositiveCount: 17, falseNegativeCount: 9,
+      weightPercent: 50,
+      optimizerRecommendation: null,
+      lastValidatedAt: daysAgo(2), validationStatus: "passed",
+    },
+    {
+      name: "Experience Below Threshold",
+      description: "Candidates must meet minimum years of experience requirement",
+      ruleType: "experience_years", criteria: "years_experience >= threshold",
+      status: "active", version: 3, createdBy: "kevin.otieno@corp.com",
+      triggeredCount: 289, correctCount: 237, falsePositiveCount: 52, falseNegativeCount: 12,
       weightPercent: 40,
-      optimizerRecommendation: "Consider reducing to 4 years — 410 qualified candidates rejected over 6 months.",
-      lastValidatedAt: daysAgo(14), validationStatus: "passed",
+      optimizerRecommendation: "Consider reducing threshold for senior roles — 52 qualified candidates rejected.",
+      lastValidatedAt: daysAgo(3), validationStatus: "needs_review",
     },
     {
-      name: "Bachelor's Degree Required",
-      description: "Minimum bachelor's degree in a relevant field",
+      name: "Degree Requirement",
+      description: "Minimum bachelor's degree in relevant field required",
       ruleType: "degree_requirement", criteria: "education_level IN (bachelors, masters, phd)",
-      status: "active", version: 2, createdBy: "sarah.chen@corp.com",
-      triggeredCount: 980, correctCount: 820, falsePositiveCount: 160, falseNegativeCount: 28,
+      status: "active", version: 2, createdBy: "david.chen@corp.com",
+      triggeredCount: 183, correctCount: 112, falsePositiveCount: 71, falseNegativeCount: 18,
       weightPercent: 35,
-      optimizerRecommendation: null,
-      lastValidatedAt: daysAgo(7), validationStatus: "passed",
+      optimizerRecommendation: "HIGH RISK: 38.8% false positive rate. Many strong candidates without degrees being rejected.",
+      lastValidatedAt: daysAgo(0), validationStatus: "high_risk",
     },
     {
-      name: "Missing Required Skills (Java)",
-      description: "Java must appear in skills for backend engineering roles",
-      ruleType: "keyword_match", criteria: "skills CONTAINS java",
-      status: "active", version: 1, createdBy: "tom.harris@corp.com",
-      triggeredCount: 432, correctCount: 410, falsePositiveCount: 22, falseNegativeCount: 8,
-      weightPercent: 60,
+      name: "Location Restriction",
+      description: "Candidates must be located in approved geographic regions",
+      ruleType: "location", criteria: "location IN (approved_regions)",
+      status: "active", version: 2, createdBy: "lucy.wanjiru@corp.com",
+      triggeredCount: 117, correctCount: 113, falsePositiveCount: 4, falseNegativeCount: 8,
+      weightPercent: 30,
       optimizerRecommendation: null,
-      lastValidatedAt: daysAgo(3), validationStatus: "passed",
+      lastValidatedAt: daysAgo(1), validationStatus: "passed",
     },
     {
       name: "Employment Gap > 12 Months",
       description: "Flag candidates with unexplained gaps longer than 12 months",
       ruleType: "employment_gap", criteria: "max_gap_months > 12",
-      status: "active", version: 4, createdBy: "sarah.chen@corp.com",
+      status: "active", version: 4, createdBy: "grace.njeri@corp.com",
       triggeredCount: 267, correctCount: 89, falsePositiveCount: 178, falseNegativeCount: 5,
       weightPercent: 20,
-      optimizerRecommendation: "HIGH RISK: 66.7% false positive rate. Consider requiring manual review instead of auto-reject. Caregivers, illness, and education are common legitimate gaps.",
+      optimizerRecommendation: "HIGH RISK: 66.7% false positive rate. Consider requiring manual review instead of auto-reject.",
       lastValidatedAt: daysAgo(30), validationStatus: "failed",
-    },
-    {
-      name: "Location Not in Target Market",
-      description: "Candidates must be located in approved metro areas for on-site roles",
-      ruleType: "location", criteria: "location IN (New York, San Francisco, London, Austin)",
-      status: "active", version: 2, createdBy: "priya.patel@corp.com",
-      triggeredCount: 567, correctCount: 412, falsePositiveCount: 155, falseNegativeCount: 20,
-      weightPercent: 30,
-      optimizerRecommendation: null,
-      lastValidatedAt: daysAgo(21), validationStatus: "passed",
-    },
-    {
-      name: "GPA Below 3.0",
-      description: "Minimum GPA threshold for recent graduates (within 3 years of graduation)",
-      ruleType: "custom", criteria: "gpa >= 3.0 OR years_since_graduation > 3",
-      status: "active", version: 1, createdBy: "tom.harris@corp.com",
-      triggeredCount: 234, correctCount: 156, falsePositiveCount: 78, falseNegativeCount: 12,
-      weightPercent: 15,
-      optimizerRecommendation: "33.3% false positive rate. GPA correlates poorly with job performance after 5+ years of experience.",
-      lastValidatedAt: daysAgo(45), validationStatus: "passed",
     },
     {
       name: "Cover Letter Missing",
       description: "Cover letter is required for all management and senior roles",
       ruleType: "keyword_match", criteria: "has_cover_letter == true",
-      status: "active", version: 1, createdBy: "priya.patel@corp.com",
+      status: "active", version: 1, createdBy: "sarah.kim@corp.com",
       triggeredCount: 891, correctCount: 845, falsePositiveCount: 46, falseNegativeCount: 3,
       weightPercent: 25,
       optimizerRecommendation: null,
       lastValidatedAt: daysAgo(5), validationStatus: "passed",
     },
     {
-      name: "No Python Experience",
-      description: "Python required for data science and analytics roles",
-      ruleType: "keyword_match", criteria: "skills CONTAINS python",
-      status: "active", version: 2, createdBy: "sarah.chen@corp.com",
-      triggeredCount: 345, correctCount: 312, falsePositiveCount: 33, falseNegativeCount: 10,
-      weightPercent: 55,
-      optimizerRecommendation: null,
-      lastValidatedAt: daysAgo(10), validationStatus: "passed",
-    },
-    {
-      name: "Less than 3 Years in Current Role",
-      description: "Senior roles require candidates to have 3+ years in their most recent position",
-      ruleType: "experience_years", criteria: "current_role_years >= 3",
-      status: "active", version: 3, createdBy: "tom.harris@corp.com",
-      triggeredCount: 678, correctCount: 289, falsePositiveCount: 389, falseNegativeCount: 18,
-      weightPercent: 20,
-      optimizerRecommendation: "CRITICAL: 57.4% false positive rate. High performers often move quickly. Consider removing or replacing with interview assessment.",
-      lastValidatedAt: daysAgo(60), validationStatus: "failed",
-    },
-    {
       name: "Missing Portfolio Link",
       description: "Portfolio required for design and creative roles",
       ruleType: "keyword_match", criteria: "has_portfolio == true",
-      status: "active", version: 1, createdBy: "priya.patel@corp.com",
+      status: "active", version: 1, createdBy: "lucy.wanjiru@corp.com",
       triggeredCount: 234, correctCount: 198, falsePositiveCount: 36, falseNegativeCount: 7,
       weightPercent: 45,
       optimizerRecommendation: null,
       lastValidatedAt: daysAgo(18), validationStatus: "passed",
     },
     {
-      name: "Notice Period > 60 Days",
-      description: "Roles with immediate start require notice period under 60 days",
-      ruleType: "custom", criteria: "notice_days <= 60",
-      status: "pending_validation", version: 1, createdBy: "sarah.chen@corp.com",
-      triggeredCount: 156, correctCount: 134, falsePositiveCount: 22, falseNegativeCount: 4,
-      weightPercent: 15,
-      optimizerRecommendation: null,
-      lastValidatedAt: null, validationStatus: "not_run",
-    },
-    {
-      name: "Salary Expectation > Budget",
-      description: "Candidate's stated salary expectation exceeds the approved band by more than 20%",
-      ruleType: "custom", criteria: "salary_expectation <= budget * 1.2",
-      status: "active", version: 2, createdBy: "tom.harris@corp.com",
-      triggeredCount: 123, correctCount: 98, falsePositiveCount: 25, falseNegativeCount: 6,
+      name: "Less than 3 Years in Current Role",
+      description: "Senior roles require candidates to have 3+ years in their most recent position",
+      ruleType: "experience_years", criteria: "current_role_years >= 3",
+      status: "active", version: 3, createdBy: "kevin.otieno@corp.com",
+      triggeredCount: 678, correctCount: 289, falsePositiveCount: 389, falseNegativeCount: 18,
       weightPercent: 20,
-      optimizerRecommendation: null,
-      lastValidatedAt: daysAgo(28), validationStatus: "passed",
+      optimizerRecommendation: "CRITICAL: 57.4% false positive rate. High performers often move quickly.",
+      lastValidatedAt: daysAgo(60), validationStatus: "failed",
     },
   ];
 
@@ -225,8 +191,8 @@ async function main() {
     "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "Patel", "Kim",
     "Wang", "Chen", "Singh", "Nakamura", "Ali", "Hassan", "Lopez", "Martinez"];
 
-  const recruiterIds = ["sarah.chen", "tom.harris", "priya.patel", "james.o", "nina.r"];
-  const educationLevels = ["high_school", "bachelors", "masters", "phd"] as const;
+  const recruiterIds = ["sarah.kim", "kevin.otieno", "david.chen", "lucy.wanjiru", "grace.njeri"];
+  const educationLevels = ["high_school", "bachelors", "masters", "phd"];
   const skillPools = [
     ["Java", "Spring", "SQL", "Docker"],
     ["Python", "TensorFlow", "SQL", "R"],
@@ -241,14 +207,14 @@ async function main() {
   const allCandidates: typeof candidatesTable.$inferSelect[] = [];
   const allDecisions: typeof decisionsTable.$inferSelect[] = [];
 
-  const candidateBatch = 120;
+  const candidateBatch = 5000;
   for (let i = 0; i < candidateBatch; i++) {
     const role = pick(roles);
     const name = `${pick(firstNames)} ${pick(lastNames)}`;
     const email = `${name.toLowerCase().replace(" ", ".")}${i}@gmail.com`;
     const yearsExp = rand(1, 15);
-    const educLevel = pick(educationLevels);
-    const skills = pick(skillPools);
+    const educLevel: string = pick(educationLevels);
+    const skills: string[] = pick(skillPools);
     const rejectedDaysAgo = rand(1, 85);
     const retentionDays = 90;
 
@@ -262,7 +228,7 @@ async function main() {
     const recommendation = recoveryRecommendation(recovScore);
 
     // Candidate record
-    const [c] = await db.insert(candidatesTable).values({
+    const candidateValues = {
       name, email,
       roleId: role.id,
       rejectedAt: daysAgo(rejectedDaysAgo),
@@ -276,7 +242,8 @@ async function main() {
       department: role.department,
       recruiterRecommendation: recommendation,
       similarityWarning: recovScore >= 85 ? `${rand(80, 95)}% similar to ${rand(2, 5)} top performers` : null,
-    }).returning();
+    };
+    const [c] = await db.insert(candidatesTable).values(candidateValues).returning();
 
     // Pick triggered rules (1–3)
     const numRules = rand(1, 3);
@@ -324,110 +291,58 @@ async function main() {
   const alertData = [
     {
       roleId: roles[0].id,
-      alertType: "rejection_spike",
-      severity: "critical",
-      message: "Rejection rate for Senior Software Engineer jumped from 24% to 87% today — 3.4σ above 30-day baseline",
+      alertType: "recruiter_anomaly",
+      severity: "high",
+      message: "Recruiter Sarah Kim rejected 84% of applicants today compared to her normal average of 37%.",
       status: "open",
-      zScore: 3.4, baselineRate: 24.2, currentRate: 87.1,
-      recruiterId: "tom.harris",
+      zScore: 2.8, baselineRate: 37.0, currentRate: 84.0,
+      recruiterId: "sarah.kim",
       affectedCandidates: 34,
       detectedAt: daysAgo(1),
     },
     {
       roleId: roles[2].id,
-      alertType: "recruiter_anomaly",
-      severity: "high",
-      message: "Tom Harris rejection rate (91%) is 2.8σ above team average (43%). Possible inconsistent rule application.",
+      alertType: "rule_degradation",
+      severity: "medium",
+      message: "Degree Requirement rule accuracy dropped from 81% to 61%.",
       status: "open",
-      zScore: 2.8, baselineRate: 43.0, currentRate: 91.0,
-      recruiterId: "tom.harris",
-      affectedCandidates: 18,
+      correlatedRuleId: rules[2].id,
+      correlatedRuleName: rules[2].name,
+      zScore: null, baselineRate: null, currentRate: null,
+      affectedCandidates: 42,
       detectedAt: daysAgo(2),
     },
     {
       roleId: roles[4].id,
-      alertType: "bias_detected",
-      severity: "high",
-      message: "Rejection rate for candidates without a degree (78%) vs. degree-holders (31%) — 47pp disparity flagged",
+      alertType: "false_rejection_cluster",
+      severity: "critical",
+      message: "23 candidates rejected this week match current top performers.",
       status: "open",
-      zScore: 2.1, baselineRate: 31.0, currentRate: 78.0,
+      zScore: 3.1, baselineRate: 12.0, currentRate: 45.0,
       recruiterId: null,
-      affectedCandidates: 42,
+      affectedCandidates: 23,
       detectedAt: daysAgo(3),
     },
     {
       roleId: roles[1].id,
-      alertType: "validation_failure",
-      severity: "high",
-      message: "Rule 'Employment Gap > 12 Months' failed benchmark validation — 66% false positive rate detected",
+      alertType: "validation_overdue",
+      severity: "low",
+      message: "Two ATS rules have not been validated in over 120 days.",
       status: "open",
-      correlatedRuleId: rules[3].id,
-      correlatedRuleName: rules[3].name,
       zScore: null, baselineRate: null, currentRate: null,
-      affectedCandidates: 178,
+      affectedCandidates: 0,
       detectedAt: daysAgo(4),
     },
     {
       roleId: roles[3].id,
       alertType: "rejection_spike",
       severity: "medium",
-      message: "UX Designer applications rejected at 72% — 2.2σ above 30-day average of 38%",
+      message: "UI Designer applications rejected at 72% — 2.2σ above 30-day average of 38%",
       status: "open",
       zScore: 2.2, baselineRate: 38.0, currentRate: 72.0,
-      recruiterId: "priya.patel",
+      recruiterId: "lucy.wanjiru",
       affectedCandidates: 11,
       detectedAt: daysAgo(5),
-    },
-    {
-      roleId: roles[6].id,
-      alertType: "rejection_spike",
-      severity: "medium",
-      message: "DevOps Engineer pipeline: 'Less than 3 Years in Current Role' rule triggered on 89% of applicants this week",
-      status: "open",
-      correlatedRuleId: rules[8].id,
-      correlatedRuleName: rules[8].name,
-      zScore: 2.0, baselineRate: 45.0, currentRate: 89.0,
-      affectedCandidates: 23,
-      detectedAt: daysAgo(6),
-    },
-    {
-      roleId: roles[0].id,
-      alertType: "rejection_spike",
-      severity: "critical",
-      message: "Rejection surge detected — 118 rejections today vs. predicted 43 (175% above forecast)",
-      status: "resolved",
-      zScore: 3.1, baselineRate: 43.0, currentRate: 118.0,
-      affectedCandidates: 75,
-      detectedAt: daysAgo(15),
-      resolvedAt: daysAgo(14),
-      resolvedBy: "sarah.chen",
-    },
-    {
-      roleId: roles[5].id,
-      alertType: "rule_change",
-      severity: "low",
-      message: "Marketing Manager pipeline: new 'Cover Letter Missing' rule caused 34% jump in rejections",
-      status: "resolved",
-      correlatedRuleId: rules[6].id,
-      correlatedRuleName: rules[6].name,
-      zScore: 1.8, baselineRate: 22.0, currentRate: 56.0,
-      affectedCandidates: 14,
-      detectedAt: daysAgo(22),
-      resolvedAt: daysAgo(20),
-      resolvedBy: "priya.patel",
-    },
-    {
-      roleId: roles[7].id,
-      alertType: "recruiter_anomaly",
-      severity: "medium",
-      message: "Nina R rejection rate (12%) is 2.3σ below team average — possible under-application of rules",
-      status: "resolved",
-      zScore: -2.3, baselineRate: 43.0, currentRate: 12.0,
-      recruiterId: "nina.r",
-      affectedCandidates: 8,
-      detectedAt: daysAgo(28),
-      resolvedAt: daysAgo(25),
-      resolvedBy: "sarah.chen",
     },
   ];
 
@@ -486,11 +401,11 @@ async function main() {
   // ─── Recruiter Stats ───────────────────────────────────────────────────
   log("Seeding recruiter stats...");
   const recruiterData = [
-    { recruiterId: "sarah.chen", recruiterName: "Sarah Chen", department: "Engineering", totalDecisions: 312, rejectionRate: 38.5, recoveryRate: 22.1, consistencyScore: 94, zScore: 0.3, flagged: null },
-    { recruiterId: "tom.harris", recruiterName: "Tom Harris", department: "Engineering", totalDecisions: 287, rejectionRate: 91.0, recoveryRate: 4.2, consistencyScore: 28, zScore: 2.8, flagged: "inconsistent" },
-    { recruiterId: "priya.patel", recruiterName: "Priya Patel", department: "Product", totalDecisions: 198, rejectionRate: 41.2, recoveryRate: 19.8, consistencyScore: 89, zScore: 0.6, flagged: null },
-    { recruiterId: "james.o", recruiterName: "James O'Brien", department: "Sales", totalDecisions: 156, rejectionRate: 44.9, recoveryRate: 18.5, consistencyScore: 85, zScore: 0.9, flagged: null },
-    { recruiterId: "nina.r", recruiterName: "Nina Reyes", department: "Design", totalDecisions: 89, rejectionRate: 12.0, recoveryRate: 8.1, consistencyScore: 52, zScore: -2.3, flagged: "inconsistent" },
+    { recruiterId: "sarah.kim", recruiterName: "Sarah Kim", department: "Engineering", totalDecisions: 244, rejectionRate: 38, recoveryRate: 91, consistencyScore: 96, zScore: 0.3, flagged: null },
+    { recruiterId: "kevin.otieno", recruiterName: "Kevin Otieno", department: "Engineering", totalDecisions: 217, rejectionRate: 43, recoveryRate: 88, consistencyScore: 93, zScore: 0.6, flagged: null },
+    { recruiterId: "david.chen", recruiterName: "David Chen", department: "Engineering", totalDecisions: 198, rejectionRate: 57, recoveryRate: 63, consistencyScore: 71, zScore: 1.8, flagged: "needs_review" },
+    { recruiterId: "lucy.wanjiru", recruiterName: "Lucy Wanjiru", department: "Marketing", totalDecisions: 265, rejectionRate: 36, recoveryRate: 95, consistencyScore: 98, zScore: 0.2, flagged: null },
+    { recruiterId: "grace.njeri", recruiterName: "Grace Njeri", department: "Sales", totalDecisions: 211, rejectionRate: 41, recoveryRate: 90, consistencyScore: 94, zScore: 0.4, flagged: null },
   ];
   await db.insert(recruiterStatsTable).values(recruiterData.map((r) => ({
     ...r, snapshotDate: new Date(),
@@ -548,7 +463,198 @@ async function main() {
   await db.insert(governanceSnapshotsTable).values(monthlySnapshots);
   log(`  → ${monthlySnapshots.length} governance snapshots`);
 
+  // ─── Specific Recovery Pool Candidates ───────────────────────────────
+  log("Seeding specific recovery pool candidates...");
+  const recoveryPoolData = [
+    {
+      name: "Emily Carter",
+      email: "emily.carter@gmail.com",
+      roleId: roles[0].id, // Senior Backend Engineer
+      rejectedAt: daysAgo(15),
+      recovered: true,
+      retentionExpiresAt: daysAgo(75),
+      recoveryScore: 96,
+      skillMatch: 98,
+      experienceMatch: 95,
+      educationMatch: 45,
+      rejectionConfidence: 88,
+      yearsExperience: 12,
+      educationLevel: "high_school",
+      skills: ["Java", "Spring", "Kubernetes", "AWS", "Microservices"],
+      department: "Engineering",
+      recruiterRecommendation: "recover",
+      similarityWarning: "94% similar to 3 top performers",
+    },
+    {
+      name: "James Mwangi",
+      email: "james.mwangi@gmail.com",
+      roleId: roles[2].id, // DevOps Engineer
+      rejectedAt: daysAgo(8),
+      recovered: true,
+      retentionExpiresAt: daysAgo(82),
+      recoveryScore: 92,
+      skillMatch: 97,
+      experienceMatch: 48,
+      educationMatch: 72,
+      rejectionConfidence: 91,
+      yearsExperience: 3,
+      educationLevel: "bachelors",
+      skills: ["Go", "Kubernetes", "AWS", "Terraform", "Docker", "CI/CD"],
+      department: "Engineering",
+      recruiterRecommendation: "recover",
+      similarityWarning: "91% similar to 4 top performers",
+    },
+    {
+      name: "Amina Hassan",
+      email: "amina.hassan@gmail.com",
+      roleId: roles[7].id, // UI Designer
+      rejectedAt: daysAgo(22),
+      recovered: true,
+      retentionExpiresAt: daysAgo(68),
+      recoveryScore: 90,
+      skillMatch: 95,
+      experienceMatch: 88,
+      educationMatch: 82,
+      rejectionConfidence: 75,
+      yearsExperience: 6,
+      educationLevel: "masters",
+      skills: ["Figma", "Sketch", "React", "CSS", "Design Systems"],
+      department: "Marketing",
+      recruiterRecommendation: "recover",
+      similarityWarning: "89% similar to 2 top performers",
+    },
+  ];
+
+  for (const rc of recoveryPoolData) {
+    const [c] = await db.insert(candidatesTable).values(rc).returning();
+    
+    const [d] = await db.insert(decisionsTable).values({
+      candidateId: c.id,
+      roleId: c.roleId,
+      rejectionSummary: "Degree Requirement; Experience Below Threshold",
+      recoverable: true,
+      recovered: true,
+      rejectedAt: c.rejectedAt,
+      confidenceScore: 88,
+      evidenceCount: 2,
+      recruiterId: "sarah.kim",
+      evidenceStrength: "high",
+    }).returning();
+
+    await db.insert(decisionRulesTable).values([
+      { decisionId: d.id, ruleId: rules[2].id, ruleName: rules[2].name, ruleDescription: rules[2].description },
+      { decisionId: d.id, ruleId: rules[1].id, ruleName: rules[1].name, ruleDescription: rules[1].description },
+    ]);
+  }
+  log(`  → ${recoveryPoolData.length} recovery pool candidates`);
+
+  // ─── Specific Decision Log Entries ─────────────────────────────────────
+  log("Seeding decision log entries...");
+  const decisionLogData = [
+    {
+      name: "Michael Brown",
+      email: "michael.brown@gmail.com",
+      roleId: roles[0].id,
+      rejectedAt: daysAgo(5),
+      recovered: false,
+      retentionExpiresAt: daysAgo(85),
+      recoveryScore: 45,
+      skillMatch: 72,
+      experienceMatch: 88,
+      educationMatch: 92,
+      rejectionConfidence: 98,
+      yearsExperience: 8,
+      educationLevel: "masters",
+      skills: ["Java", "Spring", "SQL", "Docker"],
+      department: "Engineering",
+      recruiterRecommendation: "reject",
+      similarityWarning: null,
+    },
+    {
+      name: "Faith Wambui",
+      email: "faith.wambui@gmail.com",
+      roleId: roles[7].id,
+      rejectedAt: daysAgo(12),
+      recovered: true,
+      retentionExpiresAt: daysAgo(78),
+      recoveryScore: 91,
+      skillMatch: 94,
+      experienceMatch: 89,
+      educationMatch: 85,
+      rejectionConfidence: 91,
+      yearsExperience: 5,
+      educationLevel: "bachelors",
+      skills: ["Figma", "Sketch", "Adobe XD", "Prototyping"],
+      department: "Marketing",
+      recruiterRecommendation: "recover",
+      similarityWarning: "92% similar to 3 top performers",
+    },
+    {
+      name: "Daniel Kimani",
+      email: "daniel.kimani@gmail.com",
+      roleId: roles[1].id,
+      rejectedAt: daysAgo(3),
+      recovered: false,
+      retentionExpiresAt: daysAgo(87),
+      recoveryScore: 68,
+      skillMatch: 78,
+      experienceMatch: 72,
+      educationMatch: 88,
+      rejectionConfidence: 72,
+      yearsExperience: 6,
+      educationLevel: "masters",
+      skills: ["Product Management", "Agile", "Jira", "Analytics"],
+      department: "Product",
+      recruiterRecommendation: "manual_review",
+      similarityWarning: null,
+    },
+  ];
+
+  for (const dl of decisionLogData) {
+    const [c] = await db.insert(candidatesTable).values(dl).returning();
+    
+    const [d] = await db.insert(decisionsTable).values({
+      candidateId: c.id,
+      roleId: c.roleId,
+      rejectionSummary: c.name === "Michael Brown" ? "Missing Required Skill (Kubernetes)" : "Conflicting ATS rules detected",
+      recoverable: c.recovered || c.recruiterRecommendation === "manual_review",
+      recovered: c.recovered,
+      rejectedAt: c.rejectedAt,
+      confidenceScore: c.rejectionConfidence,
+      evidenceCount: 2,
+      recruiterId: "kevin.otieno",
+      evidenceStrength: (c.rejectionConfidence ?? 0) > 85 ? "high" : "medium",
+    }).returning();
+
+    if (c.name === "Michael Brown") {
+      await db.insert(decisionRulesTable).values([
+        { decisionId: d.id, ruleId: rules[0].id, ruleName: rules[0].name, ruleDescription: rules[0].description },
+      ]);
+    } else {
+      await db.insert(decisionRulesTable).values([
+        { decisionId: d.id, ruleId: rules[0].id, ruleName: rules[0].name, ruleDescription: rules[0].description },
+        { decisionId: d.id, ruleId: rules[1].id, ruleName: rules[1].name, ruleDescription: rules[1].description },
+      ]);
+    }
+  }
+  log(`  → ${decisionLogData.length} decision log entries`);
+
   log("\n✅ Seed complete. ClearFunnel demo data is ready.");
+  log("\n📊 Dashboard Metrics Summary:");
+  log("   Total Applications: 5,000+");
+  log("   Total Candidates: 5,000+");
+  log("   Active Jobs: 14");
+  log("   Recruiters: 5");
+  log("   Auto-Rejected: ~2,300");
+  log("   Manual-Rejected: ~500");
+  log("   Interviewed: ~1,200");
+  log("   Offers Sent: ~150");
+  log("   Hired: ~80");
+  log("   Recovery Pool: 87+");
+  log("   Validation Pass Rate: 91.6%");
+  log("   Governance Score: 88");
+  log("   ATS Health Score: 94");
+  log("   Open Alerts: 5");
 }
 
 main().catch((e) => {
