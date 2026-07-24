@@ -1,0 +1,581 @@
+First of all, I think you're onto something much bigger than an ATS plugin. Looking at your dashboard, what you're actually building is **a Hiring Intelligence & Governance Platform**. The UI already hints at that.
+
+Instead of simply recording events, every panel should produce **actionable intelligence**. That's where algorithms come in.
+
+---
+
+# 1. Dashboard Overview
+
+Current Cards
+
+* Total Rejections
+* Open Alerts
+* Recovery Pool
+* Validation Pass Rate
+
+These should not just count data—they should be computed.
+
+---
+
+## A. Candidate Recovery Algorithm
+
+Used for:
+
+> Recovery Pool
+
+Purpose:
+
+Find candidates who were rejected but actually deserve another look.
+
+### Score
+
+```
+Recovery Score
+
+=
+Skill Match
++
+Experience Match
++
+Education Match
++
+Interview Feedback
+-
+Rejection Confidence
+```
+
+Example
+
+```
+Rejected Candidate
+
+Skill Match
+95%
+
+Experience
+90%
+
+ATS Confidence
+40%
+
+Recovery Score
+
+92%
+
+→ Recommend Recovery
+```
+
+---
+
+## B. Validation Confidence Score
+
+Instead of
+
+```
+Pass
+Fail
+```
+
+calculate
+
+```
+Confidence =
+
+Rule Accuracy
+
+×
+
+Historical Accuracy
+
+×
+
+Evidence Completeness
+```
+
+Example
+
+```
+Candidate
+
+Confidence
+
+97%
+
+Safe
+
+74%
+
+Needs Review
+
+42%
+
+Manual Validation
+```
+
+---
+
+# 2. Rule Registry
+
+This is where AI becomes interesting.
+
+Instead of storing rules...
+
+Store their performance.
+
+Example
+
+| Rule              | Triggered | Correct | False Positives | Accuracy |
+| ----------------- | --------- | ------- | --------------- | -------- |
+| Missing Degree    | 2,340     | 1,930   | 410             | 82%      |
+| Less than 5 Years | 890       | 520     | 370             | 58%      |
+
+Now calculate
+
+## Rule Accuracy
+
+```
+Accuracy
+
+=
+
+Correct Decisions
+
+/
+
+Total Decisions
+```
+
+Then rank rules.
+
+---
+
+# 3. Decision Log
+
+Every rejection should have an explainability score.
+
+Instead of
+
+```
+Rejected
+
+Missing Skill
+```
+
+Use
+
+```
+Decision Confidence
+
+94%
+
+Evidence
+
+Matched 3 rules
+
+Triggered 2 filters
+
+Historical Accuracy 96%
+```
+
+Algorithm
+
+```
+Decision Confidence
+
+=
+
+Σ Rule Weights
+
+/
+
+Total Possible Weight
+```
+
+---
+
+# 4. Anomaly Alerts
+
+This is where ML shines.
+
+Algorithms
+
+## Isolation Forest
+
+Detect recruiters whose behaviour suddenly changes.
+
+Example
+
+Normally rejects
+
+20%
+
+Suddenly rejects
+
+87%
+
+↓
+
+Alert
+
+Abnormal rejection behaviour detected.
+
+---
+
+## Z-Score Detection
+
+If recruiter average
+
+```
+25%
+
+```
+
+today
+
+```
+73%
+```
+
+Generate alert.
+
+---
+
+## Time Series Forecasting
+
+Predict
+
+```
+Tomorrow
+
+Expected
+
+43 rejections
+
+Actual
+
+118
+
+↓
+
+Alert
+```
+
+---
+
+# 5. Validation Harness
+
+One of my favourite ideas.
+
+Every ATS rule gets tested before production.
+
+Algorithm
+
+```
+Replay Engine
+```
+
+Take
+
+```
+50,000
+
+historical applications
+```
+
+Run
+
+```
+New Rule
+```
+
+Measure
+
+```
+Candidates Lost
+
+Candidates Saved
+
+Precision
+
+Recall
+
+False Positives
+
+False Negatives
+```
+
+---
+
+# 6. Rule Weighting
+
+Instead of
+
+```
+IF
+
+Missing Degree
+
+Reject
+```
+
+Use weighted scoring.
+
+Example
+
+```
+Degree
+
+20%
+
+Experience
+
+40%
+
+Skills
+
+30%
+
+Portfolio
+
+10%
+```
+
+Candidate
+
+```
+20
+
++
+
+40
+
++
+
+30
+
++
+
+8
+
+=
+
+98%
+```
+
+Accept
+
+---
+
+# 7. Candidate Similarity Engine
+
+This would become one of ClearFunnel's killer features.
+
+When rejecting someone...
+
+Find similar successful employees.
+
+Algorithm
+
+Cosine Similarity
+
+```
+Candidate A
+
+vs
+
+Top Employees
+```
+
+Output
+
+```
+91%
+
+Similarity
+
+↓
+
+Warning
+
+This candidate resembles three of your highest-performing engineers.
+```
+
+---
+
+# 8. Bias Detection
+
+Huge enterprise feature.
+
+Algorithms
+
+### Statistical Parity
+
+Measure
+
+```
+Male
+
+Reject Rate
+
+Female
+
+Reject Rate
+
+Difference
+```
+
+---
+
+### Equal Opportunity
+
+Measure
+
+```
+Qualified Candidates
+
+Rejected
+
+by gender
+
+age
+
+location
+
+university
+```
+
+Flag
+
+```
+Potential Bias
+```
+
+---
+
+# 9. Rule Optimizer
+
+This is where AI starts saving recruiters.
+
+Every month
+
+Analyse
+
+```
+200,000
+
+decisions
+```
+
+Find
+
+```
+Rules
+
+causing
+
+most
+
+false rejections
+```
+
+Then recommend
+
+```
+Increase experience threshold
+
+Remove keyword
+
+Relax degree requirement
+```
+
+---
+
+# 10. Executive Dashboard
+
+Not charts.
+
+KPIs.
+
+Examples
+
+```
+Hiring Efficiency Index
+```
+
+```
+Recovered Talent Value
+```
+
+```
+Estimated Revenue Lost
+```
+
+```
+Recruiter Consistency Score
+```
+
+```
+Department Risk Score
+```
+
+```
+ATS Health Score
+```
+
+```
+Governance Score
+```
+
+---
+
+# 11. Governance Score ⭐
+
+This could become the signature metric for ClearFunnel.
+
+Imagine every company gets a score from **0–100**, much like a credit score, based on how trustworthy and effective their hiring process is.
+
+It could combine:
+
+| Metric                  | Weight |
+| ----------------------- | -----: |
+| Rule Accuracy           |    20% |
+| False Rejection Rate    |    20% |
+| Recovery Success Rate   |    15% |
+| Recruiter Consistency   |    15% |
+| Explainability Coverage |    10% |
+| Bias Risk               |    10% |
+| Validation Pass Rate    |    10% |
+
+Example:
+
+```
+Governance Score
+
+89 / 100
+
+Excellent
+
+Low Risk
+
+Highly Explainable
+```
+
+That single score becomes something HR leaders can track over time, compare across departments, and report to executives.
+
+## Where I think ClearFunnel can really stand out
+
+Most ATS platforms answer questions like:
+
+* "How many people applied?"
+* "How many were rejected?"
+* "How long did hiring take?"
+
+ClearFunnel should answer much harder questions:
+
+* **Should this candidate really have been rejected?**
+* **Which hiring rules are costing us great talent?**
+* **Which recruiters are making inconsistent decisions?**
+* **What's the financial cost of false rejections?**
+* **How healthy and fair is our hiring process?**
+
+That's the difference between an **ATS dashboard** and a **Hiring Governance Platform**. If you continue in that direction, you're not competing with Greenhouse or Lever—you become a governance layer that sits above them, helping organizations make better, more accountable hiring decisions.
